@@ -166,10 +166,34 @@ the app builds, tests and runs fully offline. Set these to go live:
 | `OPENSANCTIONS_API_URL` | public API | Point at a self-hosted [yente](https://www.opensanctions.org/docs/yente/) for unlimited, rate-limit-free matching (still free) |
 | `OPENSANCTIONS_INDEX_URL` | public index | Dataset metadata index URL (override when self-hosting) |
 
-> **All-free data:** OpenSanctions (sanctions **and** PEP) and Google-News
-> adverse media need **no API key** and are enabled automatically in production
-> deploys, so `Run screening` returns real list/PEP hits out of the box. Dev,
-> test and CI stay offline/deterministic. Claude and Asana remain optional.
+> **All-free data:** **Google-News** adverse media needs no key and works as
+> soon as the deploy has outbound network. **OpenSanctions** sanctions + PEP
+> matching is also 100% free, but the *public hosted* API is now key-gated
+> (returns `403` without a subscription), so for the zero-cost live path point
+> `OPENSANCTIONS_API_URL` at a **self-hosted [yente](https://www.opensanctions.org/docs/yente/)**
+> (see below). Without it the console gracefully serves deterministic results.
+> Claude and Asana remain optional.
+
+### Run yente locally (free live sanctions + PEP)
+
+[yente](https://www.opensanctions.org/docs/yente/) is OpenSanctions' open-source
+matching engine. Run it against the free, open data for unlimited, key-free
+screening:
+
+```bash
+# 1. Start yente (it loads the free OpenSanctions default dataset on boot)
+docker run -p 8000:8000 ghcr.io/opensanctions/yente:latest
+
+# 2. Point the app at it, then start the app
+export SANCTIONS_LIVE=true
+export OPENSANCTIONS_API_URL=http://localhost:8000
+export OPENSANCTIONS_INDEX_URL=http://localhost:8000/catalog
+npm run dev   # or: npm run build && npm run start
+```
+
+`Run screening` now returns real sanctions/PEP hits from your local yente — no
+API key, no per-request cost. For production, run yente as a service and set the
+same env vars on the deploy.
 
 ## Contributing
 
