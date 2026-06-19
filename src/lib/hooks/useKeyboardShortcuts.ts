@@ -26,7 +26,10 @@ function isEditableTarget(el: EventTarget | null): boolean {
  */
 export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers): void {
   const ref = useRef(handlers);
-  ref.current = handlers;
+  // Keep the latest handlers in the ref without re-subscribing the key listener.
+  useEffect(() => {
+    ref.current = handlers;
+  });
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
