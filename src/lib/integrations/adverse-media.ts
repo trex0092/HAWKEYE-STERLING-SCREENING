@@ -1,8 +1,10 @@
 // ── Adverse media (free, Google News) ────────────────────────────────────────
-// When ADVERSE_MEDIA_LIVE=true, pulls negative-news headlines for a subject
-// from the free Google News RSS endpoint (no API key required) and optionally
-// enriches sentiment/category with Claude. Otherwise returns deterministic
-// seed hits so the Adverse Media module renders identically offline.
+// The feed is LIVE by default everywhere (dev + prod): it pulls negative-news
+// headlines for a subject from the free Google News RSS endpoint (no API key
+// required) and optionally enriches sentiment/category with Claude. Live results
+// are never replaced with mock data — a failed/empty fetch returns no headlines.
+// Only the deterministic unit-test runner (NODE_ENV=test), or an explicit
+// ADVERSE_MEDIA_LIVE=false, falls back to the seed fixtures.
 
 import { fetchTextWithTimeout } from "@/lib/integrations/http";
 import { liveEnabled } from "@/lib/integrations/config";
@@ -69,6 +71,8 @@ export interface AdverseMediaResult {
 
 export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaResult> {
   const live = liveEnabled("ADVERSE_MEDIA_LIVE");
+  // Offline only (the deterministic unit-test runner): seed fixtures. Live
+  // deployments NEVER serve seed/mock news — the feed is all live.
   if (!live) return { hits: seedFeed(subject), live: false };
 
   const query = subject
@@ -79,10 +83,11 @@ export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaRe
   const res = await fetchTextWithTimeout(url, {
     headers: { "user-agent": "Mozilla/5.0 HawkeyeSterlingScreening/1.0" },
   });
-  if (!res.ok || !res.text) return { hits: seedFeed(subject), live: false };
+  // Live source attempted: return ONLY real coverage. On a failed or empty
+  // fetch, return an empty live result — never fall back to fabricated seed news.
+  if (!res.ok || !res.text) return { hits: [], live: true };
 
   const hits = parseGoogleNewsRss(res.text, subject || "Watchlist");
-  if (!hits.length) return { hits: seedFeed(subject), live: false };
 
   // Best-effort AI enrichment of the top few headlines (no-op without a key).
   await Promise.all(

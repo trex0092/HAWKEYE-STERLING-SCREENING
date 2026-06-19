@@ -10,6 +10,10 @@ export function liveEnabled(flag: FreeFlag): boolean {
   const v = process.env[flag];
   if (v === "true") return true;
   if (v === "false") return false;
+  // Adverse media is free and keyless, so it stays LIVE everywhere (dev + prod);
+  // only the deterministic unit-test runner falls back to seed fixtures. Other
+  // free sources default production-on. An explicit env value always wins.
+  if (flag === "ADVERSE_MEDIA_LIVE") return process.env.NODE_ENV !== "test";
   return process.env.NODE_ENV === "production";
 }
 

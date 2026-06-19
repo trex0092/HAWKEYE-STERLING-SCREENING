@@ -6,6 +6,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Adverse media is now all live** — the Google-News feed runs live by default
+  in every environment (dev + prod), not just production. Live results are never
+  replaced with seed/mock headlines: a failed or empty fetch returns no news
+  rather than fabricated entries. Only the deterministic unit-test runner (or an
+  explicit `ADVERSE_MEDIA_LIVE=false`) uses seed fixtures.
+
 ### Added
 
 - **Adverse media wired into the screening verdict** — `/api/quick-screen` now
