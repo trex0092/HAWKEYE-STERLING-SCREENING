@@ -5,7 +5,9 @@
 // so the Sanctions module renders identically offline / in CI.
 
 import { fetchJsonWithTimeout } from "@/lib/integrations/http";
+import { liveEnabled, opensanctionsApiBase, opensanctionsIndexUrl } from "@/lib/integrations/config";
 import { SOURCES, type SanctionSourceRow } from "@/lib/data/console-datasets";
+import type { SanctionSource } from "@/lib/types";
 
 // Map our display codes → OpenSanctions dataset names (free, open datasets).
 const DATASET_BY_CODE: Record<string, string> = {
@@ -16,6 +18,21 @@ const DATASET_BY_CODE: Record<string, string> = {
   INTERPOL: "interpol_red_notices",
   EOCN: "ext_cy_eu_sanctions", // best-effort; falls back to seed when absent
 };
+
+// Reverse map (OpenSanctions dataset name → our display code) for tagging hits.
+const CODE_BY_DATASET: Record<string, SanctionSource> = {
+  us_ofac_sdn: "OFAC",
+  us_ofac_cons: "OFAC",
+  un_sc_sanctions: "UN",
+  eu_fsf: "EU",
+  gb_hmt_sanctions: "UK",
+  interpol_red_notices: "INTERPOL",
+};
+
+/** Best-effort map of an OpenSanctions dataset name to one of our list codes. */
+export function listCodeForDataset(dataset: string): SanctionSource | null {
+  return CODE_BY_DATASET[dataset] ?? null;
+}
 
 interface OsDataset {
   name?: string;
@@ -53,14 +70,10 @@ export interface SanctionSourcesResult {
 }
 
 export async function fetchSanctionSources(): Promise<SanctionSourcesResult> {
-  const live = process.env.SANCTIONS_LIVE === "true";
+  const live = liveEnabled("SANCTIONS_LIVE");
   if (!live) return { sources: SOURCES, live: false };
 
-  const res = await fetchJsonWithTimeout(
-    "https://data.opensanctions.org/datasets/latest/index.json",
-    {},
-    8000,
-  );
+  const res = await fetchJsonWithTimeout(opensanctionsIndexUrl(), {}, 8000);
   const index = res.ok ? (res.data as OsIndex) : null;
   if (!index?.datasets) return { sources: SOURCES, live: false };
 
@@ -85,6 +98,8 @@ export interface SanctionMatch {
   schema: string;
   score: number;
   datasets: string[];
+  /** OpenSanctions topics, e.g. "sanction", "role.pep", "crime". */
+  topics: string[];
 }
 
 interface OsSearchResult {
@@ -93,15 +108,16 @@ interface OsSearchResult {
     schema?: string;
     score?: number;
     datasets?: string[];
+    properties?: { topics?: string[] };
   }>;
 }
 
 /** Match a name against the public OpenSanctions search API, or null offline. */
 export async function screenName(name: string): Promise<SanctionMatch[] | null> {
-  const live = process.env.SANCTIONS_LIVE === "true";
+  const live = liveEnabled("SANCTIONS_LIVE");
   if (!live || !name.trim()) return null;
 
-  const url = `https://api.opensanctions.org/search/default?q=${encodeURIComponent(name)}&limit=5`;
+  const url = `${opensanctionsApiBase()}/search/default?q=${encodeURIComponent(name)}&limit=5`;
   const res = await fetchJsonWithTimeout(url, {}, 8000);
   if (!res.ok) return null;
   const data = res.data as OsSearchResult;
@@ -112,5 +128,16 @@ export async function screenName(name: string): Promise<SanctionMatch[] | null> 
     schema: r.schema ?? "Entity",
     score: typeof r.score === "number" ? r.score : 0,
     datasets: Array.isArray(r.datasets) ? r.datasets : [],
+    topics: Array.isArray(r.properties?.topics) ? r.properties.topics : [],
   }));
+}
+
+/** True when any topic marks the entity as a politically-exposed person. */
+export function matchIsPep(m: SanctionMatch): boolean {
+  return m.topics.some((t) => t.startsWith("role.pep") || t === "role.rca");
+}
+
+/** True when any topic marks the entity as sanctioned. */
+export function matchIsSanctioned(m: SanctionMatch): boolean {
+  return m.topics.includes("sanction");
 }

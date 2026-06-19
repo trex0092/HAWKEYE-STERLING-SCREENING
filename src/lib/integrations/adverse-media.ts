@@ -5,6 +5,7 @@
 // seed hits so the Adverse Media module renders identically offline.
 
 import { fetchTextWithTimeout } from "@/lib/integrations/http";
+import { liveEnabled } from "@/lib/integrations/config";
 import { classifyAdverseMedia } from "@/lib/ai/anthropic";
 import { MEDIA, type MediaHit } from "@/lib/data/console-datasets";
 
@@ -66,7 +67,7 @@ export interface AdverseMediaResult {
 }
 
 export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaResult> {
-  const live = process.env.ADVERSE_MEDIA_LIVE === "true";
+  const live = liveEnabled("ADVERSE_MEDIA_LIVE");
   if (!live) return { hits: seedFeed(subject), live: false };
 
   const query = subject

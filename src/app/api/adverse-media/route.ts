@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchAdverseMedia } from "@/lib/integrations/adverse-media";
+import { liveEnabled } from "@/lib/integrations/config";
 
 // ── Adverse-media verdict ────────────────────────────────────────────────────
 // Deterministic, offline verdict derived from a hash of the subject name (the
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
   let live = false;
   let headlines: Awaited<ReturnType<typeof fetchAdverseMedia>>["hits"] | undefined;
 
-  if (process.env.ADVERSE_MEDIA_LIVE === "true" && name && !name.toLowerCase().includes("test")) {
+  if (liveEnabled("ADVERSE_MEDIA_LIVE") && name && !name.toLowerCase().includes("test")) {
     const result = await fetchAdverseMedia(name);
     live = result.live;
     headlines = result.hits.slice(0, 5);
