@@ -134,7 +134,7 @@ container build is defined by the root `Dockerfile`.
 
 | Route | Method | Purpose |
 |---|---|---|
-| `/api/quick-screen` | POST | Auto-screen a subject → score, severity, reasoning, hits |
+| `/api/quick-screen` | POST | Auto-screen a subject against free OpenSanctions (sanctions + PEP) → score, severity, reasoning, hits; deterministic mock offline |
 | `/api/adverse-media` | POST | Adverse-media verdict (risk tier, SAR flag) |
 | `/api/cases/nl-search` | POST | Resolve a natural-language query into matches |
 | `/api/screening/bulk-rescreen` | POST | Re-screen the portfolio |
@@ -161,8 +161,13 @@ the app builds, tests and runs fully offline. Set these to go live:
 | `ANTHROPIC_API_KEY` | _(unset)_ | Enable Claude (`claude-opus-4-8`) media/screening enrichment |
 | `ASANA_ACCESS_TOKEN` | _(unset)_ | Personal access token for `/api/asana/sync` (else mock) |
 | `ASANA_PROJECT_ID` / `ASANA_WORKSPACE_ID` | _(unset)_ | Where synced Asana tasks land |
-| `ADVERSE_MEDIA_LIVE` | `false` | `true` pulls live free Google-News headlines |
-| `SANCTIONS_LIVE` | `false` | `true` reads live free OpenSanctions list data |
+| `ADVERSE_MEDIA_LIVE` | _(prod: on)_ | Free Google-News headlines. On in production, off in dev/test; set `true`/`false` to override |
+| `SANCTIONS_LIVE` | _(prod: on)_ | Free OpenSanctions sanctions **+ PEP** data powering the real screening verdict. On in production, off in dev/test; set `true`/`false` to override |
+
+> **All-free data:** OpenSanctions (sanctions **and** PEP) and Google-News
+> adverse media need **no API key** and are enabled automatically in production
+> deploys, so `Run screening` returns real list/PEP hits out of the box. Dev,
+> test and CI stay offline/deterministic. Claude and Asana remain optional.
 
 ## Contributing
 

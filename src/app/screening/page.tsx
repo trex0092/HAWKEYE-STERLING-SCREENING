@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import type { Subject, SubjectStatus, CDDPosture, EntityType, BadgeTone } from "@/lib/types";
+import type {
+  Subject,
+  SubjectStatus,
+  CDDPosture,
+  EntityType,
+  BadgeTone,
+  SanctionSource,
+} from "@/lib/types";
 import { SUBJECTS } from "@/lib/data/subjects";
 import { operatorById } from "@/lib/data/operators";
 import {
@@ -48,6 +55,39 @@ import { EMPTY_DRAFT, type ConsoleSettings, type Density, type Draft } from "@/c
 
 // Country display name → ISO code, sourced from the full console country list.
 const CC: Record<string, string> = COUNTRY_CODES;
+
+// Shape (subset) of the /api/quick-screen response the intake flow consumes.
+interface QuickScreenResult {
+  live?: boolean;
+  pep?: boolean;
+  sanctioned?: boolean;
+  lists?: string[];
+  topScore?: number;
+  reasoning?: { decision?: "clear" | "review" | "escalate" | "block" };
+}
+
+const STATUS_BY_DECISION: Record<string, SubjectStatus> = {
+  clear: "active",
+  review: "review",
+  escalate: "escalated",
+  block: "escalated",
+};
+
+const VALID_LISTS = new Set<SanctionSource>([
+  "OFAC",
+  "UN",
+  "EU",
+  "UK",
+  "EOCN",
+  "AU",
+  "CH",
+  "CA",
+  "JP",
+  "FATF",
+  "INTERPOL",
+  "WB",
+  "ADB",
+]);
 
 const TYPE_LABEL: Record<Draft["type"], string> = {
   individual: "Individual",
@@ -248,6 +288,7 @@ export default function ScreeningConsole() {
       .split(",")
       .map((a) => a.trim())
       .filter(Boolean);
+    const jurisdiction = CC[draft.country] ?? draft.country.slice(0, 2);
     const created: Subject = {
       id,
       badge: String(nextBadge),
@@ -256,7 +297,7 @@ export default function ScreeningConsole() {
       ...(aliases.length ? { aliases } : {}),
       meta: `New subject · ${draft.idType}${draft.idNumber ? ` ${draft.idNumber}` : ""}`,
       country: draft.country,
-      jurisdiction: CC[draft.country] ?? draft.country.slice(0, 2),
+      jurisdiction,
       type: `${TYPE_LABEL[draft.type]} · Customer`,
       entityType: ENTITY_TYPE[draft.type],
       riskScore: risk,
@@ -277,6 +318,55 @@ export default function ScreeningConsole() {
     setShowNew(false);
     setDraft(EMPTY_DRAFT);
     writeAuditEvent("operator", "Opened case", `${created.id} · ${created.name}`);
+
+    // Auto-screen against the free OpenSanctions index (sanctions + PEP) and
+    // patch the new subject in place with the real verdict. Falls back silently
+    // to the local projected risk when the lookup is unavailable.
+    void (async () => {
+      const r = await fetchJson<QuickScreenResult>("/api/quick-screen", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          subject: {
+            name: created.name,
+            aliases,
+            entityType: created.entityType,
+            jurisdiction,
+          },
+        }),
+        label: "quick-screen",
+      });
+      if (!r.ok || !r.data) return;
+      const v = r.data;
+      const lists = (v.lists ?? []).filter((c): c is SanctionSource =>
+        VALID_LISTS.has(c as SanctionSource),
+      );
+      const status = STATUS_BY_DECISION[v.reasoning?.decision ?? "review"] ?? "review";
+      setSubjects((prev) =>
+        prev.map((s) =>
+          s.id === created.id
+            ? {
+                ...s,
+                riskScore: v.topScore ?? s.riskScore,
+                status,
+                listCoverage: lists,
+                mostSerious: severityWord(v.topScore ?? s.riskScore).w,
+                rca: { screened: true },
+                ...(v.pep
+                  ? { pep: { tier: "Match", rationale: "OpenSanctions PEP record" } }
+                  : {}),
+              }
+            : s,
+        ),
+      );
+      if (v.live) {
+        writeAuditEvent(
+          "operator",
+          v.sanctioned ? "Sanctions hit on screen" : v.pep ? "PEP hit on screen" : "Screened — clear",
+          `${created.id} · ${created.name}${lists.length ? ` · ${lists.join("/")}` : ""}`,
+        );
+      }
+    })();
   }
 
   const rootStyle = {

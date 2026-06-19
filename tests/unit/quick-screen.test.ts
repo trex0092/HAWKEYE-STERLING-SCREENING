@@ -41,4 +41,11 @@ describe("POST /api/quick-screen", () => {
     const res = await POST(new Request("http://localhost/api/quick-screen", { method: "POST" }));
     expect(res.status).toBe(200);
   });
+
+  it("exposes the live/pep/lists contract fields in offline mode", async () => {
+    const data = await (await post({ subject: { name: "Boris Volkov" } })).json();
+    expect(data.live).toBe(false);
+    expect(typeof data.pep).toBe("boolean");
+    expect(Array.isArray(data.lists)).toBe(true);
+  });
 });

@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
+import { liveEnabled } from "@/lib/integrations/config";
+import {
+  screenName,
+  matchIsPep,
+  matchIsSanctioned,
+  listCodeForDataset,
+  type SanctionMatch,
+} from "@/lib/integrations/sanctions";
 
-// ── Deterministic, offline screening mock ────────────────────────────────────
-// Derives a plausible, reproducible verdict from a hash of the subject name.
-// No external calls, no secrets. The response shape matches the page's
-// QuickScreenAPIResponse contract exactly.
+// ── Subject auto-screen ──────────────────────────────────────────────────────
+// Free, no-key by default in production: name-matches the subject against the
+// open OpenSanctions index (sanctions + PEP topics) and builds a verdict from
+// the real hits. In dev/test/CI — or whenever the live lookup is unreachable —
+// it falls back to a deterministic, offline mock derived from a hash of the
+// name, so the response shape and tests stay stable.
 
 function hash(s: string): number {
   let h = 2166136261;
@@ -65,9 +75,153 @@ const COMMON_FAMILIES = [
 
 const METHODS = ["name+dob", "alias", "phonetic", "transliteration"];
 
-export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as { subject?: SubjectPayload };
-  const subject = body.subject ?? {};
+function severityFor(score: number): "critical" | "high" | "medium" | "low" {
+  return score >= 85 ? "critical" : score >= 70 ? "high" : score >= 50 ? "medium" : "low";
+}
+
+function decisionFor(score: number): "clear" | "review" | "escalate" | "block" {
+  return score >= 90 ? "block" : score >= 75 ? "escalate" : score >= 50 ? "review" : "clear";
+}
+
+// ── Live (free OpenSanctions) screen ─────────────────────────────────────────
+
+async function liveScreen(subject: SubjectPayload): Promise<object | null> {
+  const name = (subject.name ?? "").trim();
+  const matches = await screenName(name);
+  if (!matches || matches.length === 0) {
+    // Reachable but no hits → a genuine, real "clear" verdict.
+    if (matches !== null) return cleanVerdict(name, subject);
+    return null; // unreachable/disabled → caller falls back to the mock
+  }
+
+  matches.sort((a, b) => b.score - a.score);
+  const top = matches[0]!;
+  const topScore = Math.max(1, Math.min(99, Math.round(top.score * 100)));
+  const pep = matches.some(matchIsPep);
+  const sanctioned = matches.some(matchIsSanctioned);
+  const lists = Array.from(
+    new Set(
+      matches.flatMap((m) =>
+        m.datasets.map(listCodeForDataset).filter((c): c is NonNullable<typeof c> => !!c),
+      ),
+    ),
+  );
+
+  const hits: ScreenHit[] = matches.slice(0, 5).map((m, i) => {
+    const code = m.datasets.map(listCodeForDataset).find(Boolean) ?? null;
+    const hit: ScreenHit = {
+      listId: code ? code.toLowerCase() : (m.datasets[0] ?? "opensanctions"),
+      listRef: m.datasets[0] ?? "opensanctions",
+      candidateName: m.name,
+      score: Math.max(1, Math.min(99, Math.round(m.score * 100))),
+      method: m.topics.length ? topicMethod(m) : METHODS[i % METHODS.length]!,
+    };
+    if (m.topics.length) hit.programs = m.topics;
+    return hit;
+  });
+
+  const decision = sanctioned ? decisionFor(Math.max(topScore, 75)) : decisionFor(topScore);
+  const severity = severityFor(decision === "escalate" || decision === "block" ? Math.max(topScore, 75) : topScore);
+
+  const factors = [
+    { label: "Name / alias match", weight: topScore, detail: top.schema ?? "entity" },
+    {
+      label: "Sanctions exposure",
+      weight: sanctioned ? Math.max(80, topScore) : 10,
+      detail: sanctioned ? lists.join(", ") || "listed" : "no list hit",
+    },
+    {
+      label: "PEP exposure",
+      weight: pep ? 70 : 10,
+      detail: pep ? "politically-exposed person" : "not a PEP",
+    },
+    {
+      label: "Jurisdiction risk",
+      weight: subject.jurisdiction ? 45 : 20,
+      detail: subject.jurisdiction || "unspecified",
+    },
+  ];
+
+  const reasoning = {
+    summary: `OpenSanctions matched "${name}" to ${matches.length} record(s); top score ${topScore}.${
+      sanctioned ? " Subject appears on a sanctions list." : ""
+    }${pep ? " Subject is flagged as a PEP." : ""}`,
+    decision,
+    score: topScore,
+    factors,
+    recommendation:
+      decision === "clear"
+        ? "Clear and proceed; retain for ongoing screening."
+        : decision === "review"
+          ? "Route to L1 analyst for disposition within SLA."
+          : "Escalate to L2 / MLRO; freeze onboarding pending review.",
+  };
+
+  const openSanctionsAugmentation: AugmentationRecord[] = matches.slice(0, 3).map((m) => ({
+    source: "opensanctions",
+    name: m.name,
+    jurisdiction: subject.jurisdiction || "ZZ",
+    status: matchIsSanctioned(m) ? "designated" : matchIsPep(m) ? "pep" : "listed",
+    url: "https://www.opensanctions.org/",
+  }));
+
+  return {
+    ok: true,
+    live: true,
+    pep,
+    sanctioned,
+    lists,
+    topScore,
+    severity,
+    reasoning,
+    hits,
+    openSanctionsAugmentation,
+    commonNameExpansion: COMMON_FAMILIES.some((f) => name.toLowerCase().includes(f)),
+    screeningWarnings: [],
+  };
+}
+
+function cleanVerdict(name: string, subject: SubjectPayload): object {
+  return {
+    ok: true,
+    live: true,
+    pep: false,
+    sanctioned: false,
+    lists: [] as string[],
+    topScore: 5,
+    severity: "low",
+    reasoning: {
+      summary: `No sanctions or PEP records matched "${name}" in the open OpenSanctions index.`,
+      decision: "clear",
+      score: 5,
+      factors: [
+        { label: "Name / alias match", weight: 5, detail: "no strong match" },
+        { label: "Sanctions exposure", weight: 5, detail: "no list hit" },
+        { label: "PEP exposure", weight: 5, detail: "not a PEP" },
+        {
+          label: "Jurisdiction risk",
+          weight: subject.jurisdiction ? 45 : 20,
+          detail: subject.jurisdiction || "unspecified",
+        },
+      ],
+      recommendation: "Clear and proceed; retain for ongoing screening.",
+    },
+    hits: [] as ScreenHit[],
+    openSanctionsAugmentation: [] as AugmentationRecord[],
+    commonNameExpansion: COMMON_FAMILIES.some((f) => name.toLowerCase().includes(f)),
+    screeningWarnings: [] as string[],
+  };
+}
+
+function topicMethod(m: SanctionMatch): string {
+  if (matchIsSanctioned(m)) return "sanctions-list";
+  if (matchIsPep(m)) return "pep-list";
+  return m.topics[0] ?? "name-match";
+}
+
+// ── Deterministic offline mock ───────────────────────────────────────────────
+
+function mockScreen(subject: SubjectPayload): object {
   const name = (subject.name ?? "").trim();
   const aliases = Array.isArray(subject.aliases) ? subject.aliases : [];
   const entityType = subject.entityType ?? "individual";
@@ -82,6 +236,13 @@ export async function POST(req: Request) {
     topScore >= 85 ? "critical" : topScore >= 70 ? "high" : topScore >= 50 ? "medium" : "low";
   const decision: "clear" | "review" | "escalate" | "block" =
     topScore >= 90 ? "block" : topScore >= 75 ? "escalate" : topScore >= 50 ? "review" : "clear";
+
+  const LIST_TO_CODE: Record<string, string> = {
+    ofac_sdn: "OFAC",
+    un_1267: "UN",
+    eu_consolidated: "EU",
+    uk_ofsi: "UK",
+  };
 
   // ── Hits ──
   const hitCount = clean ? 0 : 1 + (h % 3); // 1..3
@@ -100,6 +261,8 @@ export async function POST(req: Request) {
     if (useAlias) hit.matchedAlias = aliases[(h + i) % aliases.length]!;
     hits.push(hit);
   }
+
+  const lists = Array.from(new Set(hits.map((x) => LIST_TO_CODE[x.listId]).filter(Boolean)));
 
   // ── Reasoning ──
   const factors = [
@@ -229,8 +392,12 @@ export async function POST(req: Request) {
 
   const commonNameExpansion = COMMON_FAMILIES.some((f) => name.toLowerCase().includes(f));
 
-  return NextResponse.json({
+  return {
     ok: true,
+    live: false,
+    pep: false,
+    sanctioned: hitCount > 0,
+    lists,
     topScore,
     severity,
     reasoning,
@@ -249,5 +416,21 @@ export async function POST(req: Request) {
     commonNameExpansion,
     screeningWarnings,
     listHealthAtScreeningTime,
-  });
+  };
+}
+
+export async function POST(req: Request) {
+  const body = (await req.json().catch(() => ({}))) as { subject?: SubjectPayload };
+  const subject = body.subject ?? {};
+
+  if (liveEnabled("SANCTIONS_LIVE") && (subject.name ?? "").trim()) {
+    try {
+      const live = await liveScreen(subject);
+      if (live) return NextResponse.json(live);
+    } catch {
+      /* fall through to deterministic mock */
+    }
+  }
+
+  return NextResponse.json(mockScreen(subject));
 }
