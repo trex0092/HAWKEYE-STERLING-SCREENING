@@ -8,6 +8,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Screening Console rebuild** — faithful recreation of the design handoff: an
+  8-module console (Screening, Cases, Sanctions, Adverse Media, Crypto, Vessels,
+  Audit Log, Settings) with nav-rail module switching, an animated "AI analyst"
+  radar **HUD** fronted by 14 personas, a New-Subject intake modal with live
+  projected risk, and a Settings accent/density/grid switcher.
+- **Live integrations (env-gated, mock fallback):** Asana case sync
+  (`/api/asana/sync`), free **Google News** adverse media
+  (`/api/adverse-media/news`, `ADVERSE_MEDIA_LIVE`), free/open **OpenSanctions**
+  lists (`/api/sanctions/sources`, `/api/sanctions/screen`, `SANCTIONS_LIVE`),
+  and optional **Anthropic (Claude `claude-opus-4-8`)** enrichment
+  (`ANTHROPIC_API_KEY`). Each degrades to deterministic mocks when unconfigured,
+  so the build, tests and offline runs stay green.
 - Professional repository scaffolding: README, MIT `LICENSE`, `CONTRIBUTING`,
   `CODE_OF_CONDUCT`, `SECURITY` policy, and this changelog.
 - Continuous integration (GitHub Actions): type-check, lint, format check, unit

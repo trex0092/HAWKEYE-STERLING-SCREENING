@@ -3,14 +3,23 @@ import { test, expect } from "@playwright/test";
 test("root redirects to /screening and renders the console", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/screening$/);
-  await expect(page.getByText("HAWKEYE").first()).toBeVisible();
+  await expect(page.getByText("HAWKEYE STERLING")).toBeVisible();
 });
 
-test("the subject queue lists seed subjects", async ({ page }) => {
+test("the subject register lists seed subjects and shows the analyst HUD", async ({ page }) => {
   await page.goto("/screening");
-  // Scope to the queue table — the selected subject's name also appears in the
-  // detail panel heading, which would otherwise trip Playwright strict mode.
-  const table = page.getByRole("table");
-  await expect(table.getByText("Boris Volkov")).toBeVisible();
-  await expect(table.getByText("Vladimir Putin")).toBeVisible();
+  // Use subjects that aren't selected by default (Boris Volkov) and aren't in
+  // the RU "related subjects" list, so each name appears exactly once.
+  await expect(page.getByText("Helena Vance")).toBeVisible();
+  await expect(page.getByText("Amira Hassan")).toBeVisible();
+  // The HUD fronts the selected subject's analyst (Boris Volkov → Ember).
+  await expect(page.getByText("Ember")).toBeVisible();
+});
+
+test("switching modules swaps the centre content", async ({ page }) => {
+  await page.goto("/screening");
+  await page.getByRole("link", { name: "Cases" }).click();
+  await expect(page.getByText("Stage")).toBeVisible();
+  await page.getByRole("link", { name: "Sanctions" }).click();
+  await expect(page.getByText("OFAC SDN & Consolidated")).toBeVisible();
 });

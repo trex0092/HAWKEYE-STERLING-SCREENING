@@ -121,3 +121,58 @@
     background: transparent;
   }
 }
+
+/* ── HAWKEYE Sterling Screening Console — design-handoff primitives ───────────
+   Faithful recreation of the neon "Screening Console" prototype. The console
+   uses condensed type, a dynamic operator accent (rgb(var(--ac))), and the
+   radar-HUD animations below. The token system above is untouched. */
+@layer utilities {
+  .font-narrow {
+    font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+@keyframes drift {
+  to {
+    transform: translate(2.5%, -2%) scale(1.06);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinRev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes hudGlow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Respect reduced-motion in the real build (handoff §Interactions). */
+@media (prefers-reduced-motion: reduce) {
+  .console-root *,
+  .console-root *::before,
+  .console-root *::after {
+    animation: none !important;
+  }
+}
