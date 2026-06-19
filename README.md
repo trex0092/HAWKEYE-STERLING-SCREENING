@@ -1,8 +1,10 @@
 # HAWKEYE · Sterling Screening
 
 [![CI](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/ci.yml/badge.svg)](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/ci.yml)
+[![E2E](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/e2e.yml/badge.svg)](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/e2e.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 A compliance & sanctions **screening console** — a dense, keyboard-driven analyst
@@ -23,27 +25,30 @@ media, and corporate/ownership intelligence.
 
 ## Features
 
-- **Queue & triage** — sortable, filterable subject queue (critical, sanctions,
-  EDD, PEP, SLA risk, recently added, assigned-to-me, closed) with bulk actions.
-- **Screening workflow** — intake form, auto-screen with AI-style reasoning,
-  World-Check-style hit triage with structured false-positive reason codes.
-- **Detail dossier** — per-subject panel with risk, list coverage, PEP/adverse
-  media, wallets, notes, related entities, snooze, and status/CDD controls.
-- **Search** — fuzzy/transliteration/phonetic search plus a natural-language
-  search that resolves a query into a structured filter.
-- **Productivity** — saved searches, column chooser, CSV export, side-by-side
-  compare, and full keyboard shortcuts.
+- **8-module console** — Screening, Cases, Sanctions, Adverse Media, Crypto,
+  Vessels, Audit Log and Settings, switched from a sticky nav rail.
+- **Animated AI-analyst HUD** — a radar HUD (spinning rings + persona avatar)
+  fronted by 14 analyst personas, themed by a per-analyst accent.
+- **Subject register & dossier** — sortable register with risk bars and
+  status/CDD/SLA/list chips; a detail panel for reassign-analyst, status & CDD
+  controls, fields, notes, and related subjects.
+- **New-Subject intake** — modal with a live projected-risk readout that opens a
+  case and assigns an analyst by entity type.
+- **Live integrations** — Asana case sync, free Google-News adverse media,
+  free/open OpenSanctions lists, and optional Anthropic (Claude) enrichment —
+  each env-gated with deterministic mock fallbacks.
 - **Auditability** — local + (mock) server-signed audit trail for every action.
 
 ## Tech stack
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript (strict) |
-| UI | React 18 |
-| Styling | Tailwind CSS v3 (custom dark design-system tokens) |
-| Runtime | Node.js ≥ 18.17 |
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 6 (strict) |
+| UI | React 19 |
+| Styling | Tailwind CSS v4 (custom dark design-system tokens) |
+| AI | Anthropic SDK (`claude-opus-4-8`), optional |
+| Runtime | Node.js ≥ 20.9 (CI: 22) |
 
 ## Getting started
 
@@ -108,14 +113,18 @@ src/
 ├─ app/
 │  ├─ layout.tsx            # root layout (dark theme)
 │  ├─ page.tsx              # redirects / → /screening
-│  ├─ globals.css           # design-system CSS variables
-│  ├─ screening/page.tsx    # the screening console (main page)
-│  └─ api/                  # offline mock route handlers
-│     ├─ quick-screen/      ├─ adverse-media/   ├─ ongoing/
-│     ├─ four-eyes/         ├─ audit/sign/      ├─ cases/nl-search/
-│     ├─ screening/         └─ sanctions/
-├─ components/              # layout shell + screening UI components
-└─ lib/                     # types, data seeds, hooks, utilities
+│  ├─ globals.css           # design-system tokens + console animations
+│  ├─ screening/page.tsx    # the 8-module console (main page)
+│  └─ api/                  # route handlers (mock by default, env-gated live)
+│     ├─ asana/sync/        ├─ adverse-media/news/  ├─ sanctions/sources/
+│     ├─ sanctions/screen/  ├─ quick-screen/        └─ … (mock routes)
+├─ components/
+│  └─ console/             # console UI — HUD, register, per-module views
+└─ lib/
+   ├─ console/derive.ts    # pure risk/tone/sort helpers
+   ├─ data/                # subjects, operators, console datasets
+   ├─ integrations/        # Asana, Google adverse-media, OpenSanctions clients
+   └─ ai/anthropic.ts      # optional Claude enrichment
 ```
 
 Tests live in `tests/` (Vitest unit/integration) and `e2e/` (Playwright), and the
