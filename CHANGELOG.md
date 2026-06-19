@@ -8,6 +8,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Adverse media wired into the screening verdict** — `/api/quick-screen` now
+  queries the free Google-News adverse-media feed alongside the OpenSanctions
+  sanctions/PEP lists and folds negative coverage into the subject's risk score.
+  A subject with strong negative press is routed to review/escalate even when no
+  sanctions/PEP record exists **and even when the live list source is
+  unreachable** — so adverse-media-positive subjects no longer return 0/100.
+  Adverse media scores in the review/escalate band only (never an auto-block
+  without analyst verification), and the negative-article count surfaces in the
+  case's List Intelligence line and audit trail.
 - **Screening Console rebuild** — faithful recreation of the design handoff: an
   8-module console (Screening, Cases, Sanctions, Adverse Media, Crypto, Vessels,
   Audit Log, Settings) with nav-rail module switching, an animated "AI analyst"
