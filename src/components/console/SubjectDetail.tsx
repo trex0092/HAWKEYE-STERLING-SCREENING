@@ -7,6 +7,9 @@ import { cddTone, listChip, riskColor, slaColor, statusTone } from "@/lib/consol
 const STATUS_OPTS: SubjectStatus[] = ["active", "review", "escalated", "cleared"];
 const CDD_OPTS: CDDPosture[] = ["SDD", "CDD", "EDD"];
 
+// Real sanctions list codes (vs. advisory lists) used to flag a sanctions hit.
+const SANCTION_LISTS = new Set(["OFAC", "UN", "EU", "UK", "EOCN", "INTERPOL"]);
+
 function seriousColor(s: string): string {
   if (s === "critical") return "#FF6B6B";
   if (s === "high") return "#FF9F45";
@@ -45,6 +48,8 @@ export function SubjectDetail({
   onSelectRelated: (id: string) => void;
 }) {
   const lists = subject.listCoverage.length ? subject.listCoverage : ["—"];
+  const sanctionHit = subject.listCoverage.some((l) => SANCTION_LISTS.has(l));
+  const isPep = Boolean(subject.pep);
   const fields: { k: string; v: string; c?: string }[] = [
     { k: "Country", v: subject.country },
     { k: "Jurisdiction", v: subject.jurisdiction },
@@ -54,6 +59,11 @@ export function SubjectDetail({
     { k: "Exposure (AED)", v: subject.exposureAED },
     { k: "Opened", v: subject.openedAgo },
     { k: "RCA screened", v: subject.rca.screened ? "Yes" : "No" },
+    {
+      k: "PEP",
+      v: isPep ? (subject.pep?.tier ?? "Yes") : "No",
+      ...(isPep ? { c: "#FFB169" } : {}),
+    },
     { k: "Risk category", v: subject.riskCategory ?? "—" },
   ];
 
@@ -160,6 +170,46 @@ export function SubjectDetail({
           <div style={{ ...labelCap, marginTop: 2, letterSpacing: "0.12em" }}>/100 risk</div>
         </div>
       </div>
+
+      {(sanctionHit || isPep) && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {sanctionHit && (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.07em",
+                textTransform: "uppercase",
+                color: "#FF8A8A",
+                background: "rgba(255,87,87,0.12)",
+                border: "1px solid rgba(255,87,87,0.45)",
+                borderRadius: 5,
+                padding: "3px 9px",
+              }}
+            >
+              ⚑ Sanctions match
+            </span>
+          )}
+          {isPep && (
+            <span
+              title={subject.pep?.rationale}
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.07em",
+                textTransform: "uppercase",
+                color: "#FFB169",
+                background: "rgba(255,148,52,0.12)",
+                border: "1px solid rgba(255,148,52,0.45)",
+                borderRadius: 5,
+                padding: "3px 9px",
+              }}
+            >
+              ★ PEP{subject.pep?.tier ? ` · ${subject.pep.tier}` : ""}
+            </span>
+          )}
+        </div>
+      )}
 
       <div>
         <div
@@ -303,6 +353,19 @@ export function SubjectDetail({
         >
           {subject.meta}
         </div>
+        {isPep && subject.pep?.rationale && (
+          <div
+            style={{
+              fontSize: 11.5,
+              color: "#FFB169",
+              letterSpacing: "0.02em",
+              marginBottom: 9,
+              lineHeight: 1.5,
+            }}
+          >
+            PEP: {subject.pep.rationale}
+          </div>
+        )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
           {lists.map((l, i) => {
             const c = listChip(l);

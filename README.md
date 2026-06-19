@@ -163,6 +163,8 @@ the app builds, tests and runs fully offline. Set these to go live:
 | `ASANA_PROJECT_ID` / `ASANA_WORKSPACE_ID` | _(unset)_ | Where synced Asana tasks land |
 | `ADVERSE_MEDIA_LIVE` | _(prod: on)_ | Free Google-News headlines. On in production, off in dev/test; set `true`/`false` to override |
 | `SANCTIONS_LIVE` | _(prod: on)_ | Free OpenSanctions sanctions **+ PEP** data powering the real screening verdict. On in production, off in dev/test; set `true`/`false` to override |
+| `OPENSANCTIONS_API_URL` | public API | Point at a self-hosted [yente](https://www.opensanctions.org/docs/yente/) for unlimited, rate-limit-free matching (still free) |
+| `OPENSANCTIONS_INDEX_URL` | public index | Dataset metadata index URL (override when self-hosting) |
 
 > **All-free data:** OpenSanctions (sanctions **and** PEP) and Google-News
 > adverse media need **no API key** and are enabled automatically in production

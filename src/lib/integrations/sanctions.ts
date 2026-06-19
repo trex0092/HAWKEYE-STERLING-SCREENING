@@ -5,7 +5,7 @@
 // so the Sanctions module renders identically offline / in CI.
 
 import { fetchJsonWithTimeout } from "@/lib/integrations/http";
-import { liveEnabled } from "@/lib/integrations/config";
+import { liveEnabled, opensanctionsApiBase, opensanctionsIndexUrl } from "@/lib/integrations/config";
 import { SOURCES, type SanctionSourceRow } from "@/lib/data/console-datasets";
 import type { SanctionSource } from "@/lib/types";
 
@@ -73,11 +73,7 @@ export async function fetchSanctionSources(): Promise<SanctionSourcesResult> {
   const live = liveEnabled("SANCTIONS_LIVE");
   if (!live) return { sources: SOURCES, live: false };
 
-  const res = await fetchJsonWithTimeout(
-    "https://data.opensanctions.org/datasets/latest/index.json",
-    {},
-    8000,
-  );
+  const res = await fetchJsonWithTimeout(opensanctionsIndexUrl(), {}, 8000);
   const index = res.ok ? (res.data as OsIndex) : null;
   if (!index?.datasets) return { sources: SOURCES, live: false };
 
@@ -121,7 +117,7 @@ export async function screenName(name: string): Promise<SanctionMatch[] | null> 
   const live = liveEnabled("SANCTIONS_LIVE");
   if (!live || !name.trim()) return null;
 
-  const url = `https://api.opensanctions.org/search/default?q=${encodeURIComponent(name)}&limit=5`;
+  const url = `${opensanctionsApiBase()}/search/default?q=${encodeURIComponent(name)}&limit=5`;
   const res = await fetchJsonWithTimeout(url, {}, 8000);
   if (!res.ok) return null;
   const data = res.data as OsSearchResult;

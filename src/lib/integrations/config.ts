@@ -12,3 +12,21 @@ export function liveEnabled(flag: FreeFlag): boolean {
   if (v === "false") return false;
   return process.env.NODE_ENV === "production";
 }
+
+// ── OpenSanctions / yente endpoints ──────────────────────────────────────────
+// Default to the free public OpenSanctions API + data index. Point these at a
+// self-hosted yente instance (https://www.opensanctions.org/docs/yente/) for
+// unlimited, rate-limit-free screening — still 100% free, just self-run.
+
+const DEFAULT_OS_API = "https://api.opensanctions.org";
+const DEFAULT_OS_INDEX = "https://data.opensanctions.org/datasets/latest/index.json";
+
+/** Base URL of the OpenSanctions/yente search+match API (no trailing slash). */
+export function opensanctionsApiBase(): string {
+  return (process.env.OPENSANCTIONS_API_URL || DEFAULT_OS_API).replace(/\/+$/, "");
+}
+
+/** URL of the dataset metadata index (counts / last-updated). */
+export function opensanctionsIndexUrl(): string {
+  return process.env.OPENSANCTIONS_INDEX_URL || DEFAULT_OS_INDEX;
+}
