@@ -37,9 +37,7 @@ export function ScreeningReasoningPanel({
         >
           {reasoning.decision}
         </span>
-        <span className="ml-auto text-11 font-mono text-ink-2">
-          score {reasoning.score}/100
-        </span>
+        <span className="ml-auto text-11 font-mono text-ink-2">score {reasoning.score}/100</span>
       </div>
 
       <p className="text-12 text-ink-1 leading-relaxed mb-3">{reasoning.summary}</p>

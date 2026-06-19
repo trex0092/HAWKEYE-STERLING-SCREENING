@@ -50,7 +50,18 @@ const LIST_TABLE: Array<{ id: string; ref: string; programs: string[] }> = [
   { id: "uk_ofsi", ref: "OFSI-RUS-0042", programs: ["UK Russia regime"] },
 ];
 
-const COMMON_FAMILIES = ["mohamed", "mohammed", "muhammad", "ahmed", "ahmad", "ali", "hussein", "khan", "ivanov", "kim"];
+const COMMON_FAMILIES = [
+  "mohamed",
+  "mohammed",
+  "muhammad",
+  "ahmed",
+  "ahmad",
+  "ali",
+  "hussein",
+  "khan",
+  "ivanov",
+  "kim",
+];
 
 const METHODS = ["name+dob", "alias", "phonetic", "transliteration"];
 
@@ -92,9 +103,21 @@ export async function POST(req: Request) {
 
   // ── Reasoning ──
   const factors = [
-    { label: "Name / alias match", weight: Math.min(100, topScore + 5), detail: hits[0]?.method ?? "no strong match" },
-    { label: "Jurisdiction risk", weight: jurisdiction ? 40 + (h % 50) : 20, detail: jurisdiction || "unspecified" },
-    { label: "List-program severity", weight: hits[0] ? 60 + (h % 40) : 10, detail: hits[0]?.listId ?? "none" },
+    {
+      label: "Name / alias match",
+      weight: Math.min(100, topScore + 5),
+      detail: hits[0]?.method ?? "no strong match",
+    },
+    {
+      label: "Jurisdiction risk",
+      weight: jurisdiction ? 40 + (h % 50) : 20,
+      detail: jurisdiction || "unspecified",
+    },
+    {
+      label: "List-program severity",
+      weight: hits[0] ? 60 + (h % 40) : 10,
+      detail: hits[0]?.listId ?? "none",
+    },
     { label: "Entity-type modifier", weight: isOrg ? 35 + (h % 30) : 25, detail: entityType },
   ];
   const reasoning = {
@@ -158,23 +181,49 @@ export async function POST(req: Request) {
     : [];
 
   const countryRegistryAugmentation: AugmentationRecord[] = isOrg
-    ? [{ source: "uae_ded", legalName: name, jurisdiction: "AE", registrationNumber: `DED-${10000 + (h % 89999)}`, status: "licensed" }]
+    ? [
+        {
+          source: "uae_ded",
+          legalName: name,
+          jurisdiction: "AE",
+          registrationNumber: `DED-${10000 + (h % 89999)}`,
+          status: "licensed",
+        },
+      ]
     : [];
 
   const countrySanctionsAugmentation: AugmentationRecord[] =
     hitCount > 1 ? [{ source: "uae_eocn", name, jurisdiction: "AE", status: "listed" }] : [];
 
   const freeAdapterAugmentation: AugmentationRecord[] =
-    h % 4 === 0 ? [{ source: "gleif", legalName: name, jurisdiction: jurisdiction || "AE", registrationNumber: `LEI-${h % 1_000_000}` }] : [];
+    h % 4 === 0
+      ? [
+          {
+            source: "gleif",
+            legalName: name,
+            jurisdiction: jurisdiction || "AE",
+            registrationNumber: `LEI-${h % 1_000_000}`,
+          },
+        ]
+      : [];
 
   // ── Warnings + list health ──
   const screeningWarnings: string[] =
-    h % 7 === 0 ? ["EU consolidated list was 38h stale at screening time — results may be incomplete."] : [];
+    h % 7 === 0
+      ? ["EU consolidated list was 38h stale at screening time — results may be incomplete."]
+      : [];
 
-  const listHealthAtScreeningTime: Record<string, { entityCount: number; ageHours: number; status: string }> = {
+  const listHealthAtScreeningTime: Record<
+    string,
+    { entityCount: number; ageHours: number; status: string }
+  > = {
     ofac_sdn: { entityCount: 12483, ageHours: 3, status: "fresh" },
     un_1267: { entityCount: 642, ageHours: 9, status: "fresh" },
-    eu_consolidated: { entityCount: 3110, ageHours: h % 7 === 0 ? 38 : 6, status: h % 7 === 0 ? "stale" : "fresh" },
+    eu_consolidated: {
+      entityCount: 3110,
+      ageHours: h % 7 === 0 ? 38 : 6,
+      status: h % 7 === 0 ? "stale" : "fresh",
+    },
     uk_ofsi: { entityCount: 4201, ageHours: 11, status: "fresh" },
   };
 

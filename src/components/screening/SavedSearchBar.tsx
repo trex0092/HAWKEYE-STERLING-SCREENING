@@ -40,11 +40,7 @@ function persist(items: SavedSearch[]): void {
   }
 }
 
-export function SavedSearchBar({
-  active,
-  appliedId,
-  onApply,
-}: SavedSearchBarProps) {
+export function SavedSearchBar({ active, appliedId, onApply }: SavedSearchBarProps) {
   const [items, setItems] = useState<SavedSearch[]>([]);
 
   useEffect(() => {

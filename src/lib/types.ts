@@ -1,11 +1,6 @@
 // ── Core enums / unions ──────────────────────────────────────────────────────
 
-export type EntityType =
-  | "individual"
-  | "organisation"
-  | "vessel"
-  | "aircraft"
-  | "other";
+export type EntityType = "individual" | "organisation" | "vessel" | "aircraft" | "other";
 
 export type CDDPosture = "CDD" | "EDD" | "SDD";
 
