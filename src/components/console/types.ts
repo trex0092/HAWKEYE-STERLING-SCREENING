@@ -33,8 +33,8 @@ export const EMPTY_DRAFT: Draft = {
   gender: "Male",
   altNames: "",
   dob: "",
-  country: "UNITED KINGDOM",
+  country: "—",
   idNumber: "",
   idType: "Passport",
-  issuingCountry: "UNITED KINGDOM",
+  issuingCountry: "—",
 };

@@ -55,10 +55,11 @@ export function parseGoogleNewsRss(xml: string, subject: string): MediaHit[] {
 }
 
 function seedFeed(subject: string): MediaHit[] {
+  // No subject → the general demo feed. With a subject, only return genuine
+  // seed matches; never attribute unrelated negative news to an unknown name.
   if (!subject) return MEDIA;
   const lc = subject.toLowerCase();
-  const matched = MEDIA.filter((m) => m.subject.toLowerCase().includes(lc));
-  return matched.length ? matched : MEDIA;
+  return MEDIA.filter((m) => m.subject.toLowerCase().includes(lc));
 }
 
 export interface AdverseMediaResult {

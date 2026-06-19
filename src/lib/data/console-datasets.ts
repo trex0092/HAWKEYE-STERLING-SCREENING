@@ -336,6 +336,7 @@ export interface CountryOption {
 // match the console's display style. This is the single source of truth — the
 // `COUNTRIES` name list and `COUNTRY_CODES` lookup are derived from it.
 export const COUNTRY_OPTIONS: CountryOption[] = [
+  { name: "—", code: "" }, // no country / not specified
   { name: "AFGHANISTAN", code: "AF" },
   { name: "ÅLAND ISLANDS", code: "AX" },
   { name: "ALBANIA", code: "AL" },

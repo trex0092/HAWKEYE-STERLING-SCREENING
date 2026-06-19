@@ -5,7 +5,11 @@
 // so the Sanctions module renders identically offline / in CI.
 
 import { fetchJsonWithTimeout } from "@/lib/integrations/http";
-import { liveEnabled, opensanctionsApiBase, opensanctionsIndexUrl } from "@/lib/integrations/config";
+import {
+  liveEnabled,
+  opensanctionsApiBase,
+  opensanctionsIndexUrl,
+} from "@/lib/integrations/config";
 import { SOURCES, type SanctionSourceRow } from "@/lib/data/console-datasets";
 import type { SanctionSource } from "@/lib/types";
 

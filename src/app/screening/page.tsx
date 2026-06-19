@@ -288,7 +288,8 @@ export default function ScreeningConsole() {
       .split(",")
       .map((a) => a.trim())
       .filter(Boolean);
-    const jurisdiction = CC[draft.country] ?? draft.country.slice(0, 2);
+    const jurisdiction =
+      draft.country === "—" ? "—" : (CC[draft.country] || draft.country.slice(0, 2));
     const created: Subject = {
       id,
       badge: String(nextBadge),
@@ -319,9 +320,9 @@ export default function ScreeningConsole() {
     setDraft(EMPTY_DRAFT);
     writeAuditEvent("operator", "Opened case", `${created.id} · ${created.name}`);
 
-    // Auto-screen against the free OpenSanctions index (sanctions + PEP) and
-    // patch the new subject in place with the real verdict. Falls back silently
-    // to the local projected risk when the lookup is unavailable.
+    // Screen against the free OpenSanctions / yente index (sanctions + PEP) and
+    // patch the new subject with the REAL verdict only. When no live list source
+    // is connected, the subject is marked "not screened" — never fabricated.
     void (async () => {
       const r = await fetchJson<QuickScreenResult>("/api/quick-screen", {
         method: "POST",
@@ -338,34 +339,40 @@ export default function ScreeningConsole() {
       });
       if (!r.ok || !r.data) return;
       const v = r.data;
-      const lists = (v.lists ?? []).filter((c): c is SanctionSource =>
-        VALID_LISTS.has(c as SanctionSource),
-      );
+      const lists = v.live
+        ? (v.lists ?? []).filter((c): c is SanctionSource => VALID_LISTS.has(c as SanctionSource))
+        : [];
+      const score = v.topScore ?? 0;
       const status = STATUS_BY_DECISION[v.reasoning?.decision ?? "review"] ?? "review";
       setSubjects((prev) =>
         prev.map((s) =>
           s.id === created.id
             ? {
                 ...s,
-                riskScore: v.topScore ?? s.riskScore,
+                riskScore: score,
                 status,
                 listCoverage: lists,
-                mostSerious: severityWord(v.topScore ?? s.riskScore).w,
-                rca: { screened: true },
-                ...(v.pep
+                mostSerious: severityWord(score).w,
+                rca: { screened: Boolean(v.live) },
+                meta: v.live ? s.meta : `${s.meta} · not screened (no live list source)`,
+                ...(v.live && v.pep
                   ? { pep: { tier: "Match", rationale: "OpenSanctions PEP record" } }
                   : {}),
               }
             : s,
         ),
       );
-      if (v.live) {
-        writeAuditEvent(
-          "operator",
-          v.sanctioned ? "Sanctions hit on screen" : v.pep ? "PEP hit on screen" : "Screened — clear",
-          `${created.id} · ${created.name}${lists.length ? ` · ${lists.join("/")}` : ""}`,
-        );
-      }
+      writeAuditEvent(
+        "operator",
+        v.live
+          ? v.sanctioned
+            ? "Sanctions hit on screen"
+            : v.pep
+              ? "PEP hit on screen"
+              : "Screened — clear"
+          : "Not screened — no live list source",
+        `${created.id} · ${created.name}${lists.length ? ` · ${lists.join("/")}` : ""}`,
+      );
     })();
   }
 
