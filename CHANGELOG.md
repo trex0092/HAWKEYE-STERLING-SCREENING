@@ -10,8 +10,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Professional repository scaffolding: README, MIT `LICENSE`, `CONTRIBUTING`,
   `CODE_OF_CONDUCT`, `SECURITY` policy, and this changelog.
-- Continuous integration (GitHub Actions): type-check, lint, and build on every
-  push and pull request to `main`.
+- Continuous integration (GitHub Actions): type-check, lint, format check, unit
+  tests, and build on every push and pull request to `main`.
+- Test suites: **Vitest** unit/integration tests (helpers, seed data, mock API
+  routes, one jsdom component test) and a **Playwright** end-to-end smoke suite
+  with its own workflow.
+- Containerization: multi-stage non-root **Dockerfile** (Next.js standalone
+  output), `.dockerignore`, and a workflow that publishes images to GHCR on tags.
 - Issue & pull-request templates, `CODEOWNERS`, and Dependabot configuration.
 - Tooling configuration: ESLint (`next/core-web-vitals`), Prettier,
   `.editorconfig`, `.gitattributes`, `.nvmrc`, and `.env.example`.

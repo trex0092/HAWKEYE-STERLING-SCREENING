@@ -69,8 +69,34 @@ Open <http://localhost:3000> — `/` redirects to **`/screening`**.
 | `npm run start` | Serve the production build |
 | `npm run lint` | ESLint (`next lint`) |
 | `npm run typecheck` | `tsc --noEmit` (strict) |
+| `npm run test` | Unit/integration tests (Vitest) |
+| `npm run test:watch` | Vitest in watch mode |
+| `npm run e2e` | End-to-end tests (Playwright) |
 | `npm run format` | Prettier write |
 | `npm run format:check` | Prettier check |
+
+## Testing
+
+- **Unit / integration** — [Vitest](https://vitest.dev). Covers the pure helpers,
+  the seed-data invariants, and the mock API route handlers; one component render
+  test runs under jsdom. Run `npm run test`.
+- **End-to-end** — [Playwright](https://playwright.dev) (Chromium) drives the built
+  app. Run `npm run e2e` (it builds + boots the server automatically; first run:
+  `npx playwright install --with-deps chromium`).
+
+CI runs type-check, lint, format check, unit tests, and build on every push/PR to
+`main`; the Playwright suite runs as its own workflow.
+
+## Docker
+
+A multi-stage, non-root image is built from the Next.js **standalone** output:
+
+```bash
+docker build -t hawkeye-screening .
+docker run --rm -p 3000:3000 hawkeye-screening
+```
+
+Tagged releases (`v*`) are published to GHCR by the *Publish Docker image* workflow.
 
 ## Project structure
 
@@ -88,6 +114,9 @@ src/
 ├─ components/              # layout shell + screening UI components
 └─ lib/                     # types, data seeds, hooks, utilities
 ```
+
+Tests live in `tests/` (Vitest unit/integration) and `e2e/` (Playwright), and the
+container build is defined by the root `Dockerfile`.
 
 ## API routes (mock)
 
