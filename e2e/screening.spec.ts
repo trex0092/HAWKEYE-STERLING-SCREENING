@@ -8,6 +8,9 @@ test("root redirects to /screening and renders the console", async ({ page }) =>
 
 test("the subject queue lists seed subjects", async ({ page }) => {
   await page.goto("/screening");
-  await expect(page.getByText("Boris Volkov")).toBeVisible();
-  await expect(page.getByText("Vladimir Putin")).toBeVisible();
+  // Scope to the queue table — the selected subject's name also appears in the
+  // detail panel heading, which would otherwise trip Playwright strict mode.
+  const table = page.getByRole("table");
+  await expect(table.getByText("Boris Volkov")).toBeVisible();
+  await expect(table.getByText("Vladimir Putin")).toBeVisible();
 });
