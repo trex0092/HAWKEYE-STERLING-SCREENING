@@ -33,6 +33,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Tooling configuration: ESLint (`next/core-web-vitals`), Prettier,
   `.editorconfig`, `.gitattributes`, `.nvmrc`, and `.env.example`.
 
+### Changed
+
+- Refreshed README badges, tech-stack table, features and project-structure to
+  match the current stack (Next.js 16, React 19, Tailwind v4, TypeScript 6,
+  Node ≥ 20.9) and the rebuilt console.
+
+### Fixed
+
+- E2E: use an unambiguous locator for the module-switch test (the previous
+  `getByText("Stage")` matched both the column header and the module-brief note).
+
 ## [0.1.0] - 2026-06-19
 
 ### Added

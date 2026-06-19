@@ -19,7 +19,8 @@ test("the subject register lists seed subjects and shows the analyst HUD", async
 test("switching modules swaps the centre content", async ({ page }) => {
   await page.goto("/screening");
   await page.getByRole("link", { name: "Cases" }).click();
-  await expect(page.getByText("Stage")).toBeVisible();
+  // A case-row id only the Cases table renders (Boris Volkov is escalated).
+  await expect(page.getByText("CS-10001")).toBeVisible();
   await page.getByRole("link", { name: "Sanctions" }).click();
   await expect(page.getByText("OFAC SDN & Consolidated")).toBeVisible();
 });
