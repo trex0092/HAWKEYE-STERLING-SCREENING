@@ -26,9 +26,7 @@ export function Sidebar() {
           aria-current={item.active ? "page" : undefined}
           className={
             "flex items-center gap-2.5 rounded-lg px-3 py-2 text-12 transition " +
-            (item.active
-              ? "bg-brand-dim text-ink-0"
-              : "text-ink-2 hover:bg-bg-1")
+            (item.active ? "bg-brand-dim text-ink-0" : "text-ink-2 hover:bg-bg-1")
           }
         >
           <span className="text-12 leading-none">{item.glyph}</span>

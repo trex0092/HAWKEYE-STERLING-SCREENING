@@ -44,20 +44,13 @@ export function BulkActionsBar({
 
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-brand/30 bg-bg-2 px-3 py-2">
-      <span className="text-11 font-medium text-ink-0">
-        {selectedIds.length} selected
-      </span>
+      <span className="text-11 font-medium text-ink-0">{selectedIds.length} selected</span>
 
       <span className="mx-1 h-4 w-px bg-hair-2" />
 
       <span className="text-10 uppercase tracking-wide-3 text-ink-3">CDD:</span>
       {CDD_POSTURES.map((posture) => (
-        <button
-          key={posture}
-          type="button"
-          onClick={() => onApplyCdd(posture)}
-          className={ghost}
-        >
+        <button key={posture} type="button" onClick={() => onApplyCdd(posture)} className={ghost}>
           {posture}
         </button>
       ))}

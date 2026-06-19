@@ -78,9 +78,7 @@ export function ColumnChooser({ columns, onColumnsChange }: ColumnChooserProps) 
                 <input
                   type="checkbox"
                   checked={columns[key]}
-                  onChange={(e) =>
-                    onColumnsChange({ ...columns, [key]: e.target.checked })
-                  }
+                  onChange={(e) => onColumnsChange({ ...columns, [key]: e.target.checked })}
                   className="accent-brand"
                 />
                 {COLUMN_LABELS[key]}

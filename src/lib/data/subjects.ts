@@ -323,7 +323,10 @@ export const SUBJECTS: Subject[] = [
     mostSerious: "high",
     openedAgo: ddmmyyyy(OLD),
     openedAt: OLD.toISOString(),
-    walletAddresses: ["0x9f8e7d6c5b4a3210fedcba9876543210deadbeef", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"],
+    walletAddresses: [
+      "0x9f8e7d6c5b4a3210fedcba9876543210deadbeef",
+      "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    ],
     riskCategory: "Crypto / VASP",
   },
   {

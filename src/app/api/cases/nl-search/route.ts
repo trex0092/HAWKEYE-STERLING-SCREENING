@@ -50,15 +50,44 @@ export async function POST(req: Request) {
   // Deterministic keyword rules — no model, pure string logic so the route is
   // fully offline and reproducible.
   const rules: Array<{ test: boolean; why: string; pred: (s: SlimSubject) => boolean }> = [
-    { test: /\bsanction|sdn|ofac|listed\b/.test(q), why: "sanctions-list exposure", pred: (s) => s.listCoverage.length > 0 },
+    {
+      test: /\bsanction|sdn|ofac|listed\b/.test(q),
+      why: "sanctions-list exposure",
+      pred: (s) => s.listCoverage.length > 0,
+    },
     { test: /\bpep|political\b/.test(q), why: "politically exposed", pred: (s) => s.pep != null },
-    { test: /\bcritical|high[- ]?risk\b/.test(q), why: "risk ≥ 85", pred: (s) => s.riskScore >= 85 },
+    {
+      test: /\bcritical|high[- ]?risk\b/.test(q),
+      why: "risk ≥ 85",
+      pred: (s) => s.riskScore >= 85,
+    },
     { test: /\bedd|enhanced\b/.test(q), why: "EDD posture", pred: (s) => s.cddPosture === "EDD" },
-    { test: /\bvessel|ship|maritime\b/.test(q), why: "vessel entity", pred: (s) => s.entityType === "vessel" },
-    { test: /\baircraft|jet|tail\b/.test(q), why: "aircraft entity", pred: (s) => s.entityType === "aircraft" },
-    { test: /\bcrypto|wallet|chain\b/.test(q), why: "crypto exposure", pred: (s) => /wallet|crypto|mixer|chain/.test(s.meta.toLowerCase()) || s.entityType === "other" },
-    { test: /\bcleared|closed|resolved\b/.test(q), why: "cleared", pred: (s) => s.status === "cleared" },
-    { test: /\badverse|media\b/.test(q), why: "adverse media", pred: (s) => s.adverseMedia != null },
+    {
+      test: /\bvessel|ship|maritime\b/.test(q),
+      why: "vessel entity",
+      pred: (s) => s.entityType === "vessel",
+    },
+    {
+      test: /\baircraft|jet|tail\b/.test(q),
+      why: "aircraft entity",
+      pred: (s) => s.entityType === "aircraft",
+    },
+    {
+      test: /\bcrypto|wallet|chain\b/.test(q),
+      why: "crypto exposure",
+      pred: (s) =>
+        /wallet|crypto|mixer|chain/.test(s.meta.toLowerCase()) || s.entityType === "other",
+    },
+    {
+      test: /\bcleared|closed|resolved\b/.test(q),
+      why: "cleared",
+      pred: (s) => s.status === "cleared",
+    },
+    {
+      test: /\badverse|media\b/.test(q),
+      why: "adverse media",
+      pred: (s) => s.adverseMedia != null,
+    },
   ];
 
   const active = rules.filter((r) => r.test);
@@ -68,8 +97,25 @@ export async function POST(req: Request) {
   const riskFloor = numMatch && numMatch[1] !== undefined ? Number.parseInt(numMatch[1], 10) : null;
 
   // Free-text tokens (excluding stopwords) become name/meta/country substrings.
-  const STOP = new Set(["the", "and", "with", "show", "all", "find", "list", "risk", "subjects", "subject", "over", "above", "score"]);
-  const tokens = q.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((t) => t.length > 2 && !STOP.has(t) && !/^\d+$/.test(t));
+  const STOP = new Set([
+    "the",
+    "and",
+    "with",
+    "show",
+    "all",
+    "find",
+    "list",
+    "risk",
+    "subjects",
+    "subject",
+    "over",
+    "above",
+    "score",
+  ]);
+  const tokens = q
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 2 && !STOP.has(t) && !/^\d+$/.test(t));
 
   function matches(s: SlimSubject): boolean {
     for (const r of active) {
@@ -77,7 +123,8 @@ export async function POST(req: Request) {
     }
     if (riskFloor !== null && s.riskScore < riskFloor) return false;
     if (active.length === 0 && riskFloor === null && tokens.length > 0) {
-      const hay = `${s.name} ${s.meta} ${s.country} ${s.jurisdiction} ${s.aliases.join(" ")}`.toLowerCase();
+      const hay =
+        `${s.name} ${s.meta} ${s.country} ${s.jurisdiction} ${s.aliases.join(" ")}`.toLowerCase();
       return tokens.some((t) => hay.includes(t));
     }
     return true;
@@ -88,7 +135,9 @@ export async function POST(req: Request) {
   const why = [
     ...active.map((r) => r.why),
     ...(riskFloor !== null ? [`risk ≥ ${riskFloor}`] : []),
-    ...(active.length === 0 && riskFloor === null && tokens.length > 0 ? [`text match: ${tokens.join(", ")}`] : []),
+    ...(active.length === 0 && riskFloor === null && tokens.length > 0
+      ? [`text match: ${tokens.join(", ")}`]
+      : []),
   ];
   const hadSignal = why.length > 0;
   const confidence = hadSignal ? Math.min(0.95, 0.6 + active.length * 0.1) : 0.35;

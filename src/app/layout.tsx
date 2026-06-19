@@ -6,11 +6,7 @@ export const metadata: Metadata = {
   description: "Compliance & sanctions screening console",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen bg-bg text-ink-1 antialiased">{children}</body>

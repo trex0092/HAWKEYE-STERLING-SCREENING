@@ -59,7 +59,9 @@ interface SortHeaderProps {
 function SortHeader({ label, col, sortKey, sortDir, onSortChange, className }: SortHeaderProps) {
   const active = sortKey === col;
   return (
-    <th className={`px-3 py-2 text-10 font-semibold uppercase tracking-wide-3 text-ink-3 ${className ?? ""}`}>
+    <th
+      className={`px-3 py-2 text-10 font-semibold uppercase tracking-wide-3 text-ink-3 ${className ?? ""}`}
+    >
       <button
         type="button"
         onClick={() => onSortChange(col)}
@@ -115,22 +117,54 @@ export function ScreeningTable({
                 className="text-left"
               />
               {columns.risk && (
-                <SortHeader label="Risk" col="riskScore" sortKey={sortKey} sortDir={sortDir} onSortChange={onSortChange} className="text-left w-[160px]" />
+                <SortHeader
+                  label="Risk"
+                  col="riskScore"
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  onSortChange={onSortChange}
+                  className="text-left w-[160px]"
+                />
               )}
               {columns.status && (
-                <SortHeader label="Status" col="status" sortKey={sortKey} sortDir={sortDir} onSortChange={onSortChange} className="text-left w-[110px]" />
+                <SortHeader
+                  label="Status"
+                  col="status"
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  onSortChange={onSortChange}
+                  className="text-left w-[110px]"
+                />
               )}
               {columns.cdd && (
-                <SortHeader label="CDD" col="cddPosture" sortKey={sortKey} sortDir={sortDir} onSortChange={onSortChange} className="text-left w-[70px]" />
+                <SortHeader
+                  label="CDD"
+                  col="cddPosture"
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  onSortChange={onSortChange}
+                  className="text-left w-[70px]"
+                />
               )}
               {columns.sla && (
-                <SortHeader label="SLA" col="slaNotify" sortKey={sortKey} sortDir={sortDir} onSortChange={onSortChange} className="text-left w-[90px]" />
+                <SortHeader
+                  label="SLA"
+                  col="slaNotify"
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  onSortChange={onSortChange}
+                  className="text-left w-[90px]"
+                />
               )}
               {columns.lists && (
-                <th className="px-3 py-2 text-10 font-semibold uppercase tracking-wide-3 text-ink-3 text-left w-[150px]">Lists</th>
+                <th className="px-3 py-2 text-10 font-semibold uppercase tracking-wide-3 text-ink-3 text-left w-[150px]">
+                  Lists
+                </th>
               )}
               {columns.snooze && (
-                <th className="px-3 py-2 text-10 font-semibold uppercase tracking-wide-3 text-ink-3 text-left w-[110px]">Snooze</th>
+                <th className="px-3 py-2 text-10 font-semibold uppercase tracking-wide-3 text-ink-3 text-left w-[110px]">
+                  Snooze
+                </th>
               )}
               <th className="px-3 py-2 w-[90px]" />
             </tr>
@@ -169,14 +203,18 @@ export function ScreeningTable({
 
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <span className={`shrink-0 rounded px-1.5 py-0.5 text-10 font-mono ${BADGE_TONE[s.badgeTone]}`}>
+                      <span
+                        className={`shrink-0 rounded px-1.5 py-0.5 text-10 font-mono ${BADGE_TONE[s.badgeTone]}`}
+                      >
                         {s.badge}
                       </span>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-ink-0 truncate">{s.name}</span>
                           {isError && (
-                            <span className="text-10 text-red border border-red/30 bg-red-dim rounded px-1">error</span>
+                            <span className="text-10 text-red border border-red/30 bg-red-dim rounded px-1">
+                              error
+                            </span>
                           )}
                         </div>
                         <div className="text-10 text-ink-3 truncate">
@@ -195,7 +233,10 @@ export function ScreeningTable({
                       ) : (
                         <div className="flex items-center gap-2">
                           <div className="w-20 h-1.5 rounded bg-bg-2 overflow-hidden">
-                            <div className={`h-full ${riskColor(s.riskScore)}`} style={{ width: `${s.riskScore}%` }} />
+                            <div
+                              className={`h-full ${riskColor(s.riskScore)}`}
+                              style={{ width: `${s.riskScore}%` }}
+                            />
                           </div>
                           <span className="text-11 font-mono text-ink-1 w-6">{s.riskScore}</span>
                         </div>
@@ -205,17 +246,23 @@ export function ScreeningTable({
 
                   {columns.status && (
                     <td className="px-3 py-2">
-                      <span className={`text-10 font-semibold uppercase px-1.5 py-0.5 rounded border ${STATUS_STYLE[s.status]}`}>
+                      <span
+                        className={`text-10 font-semibold uppercase px-1.5 py-0.5 rounded border ${STATUS_STYLE[s.status]}`}
+                      >
                         {s.status}
                       </span>
                     </td>
                   )}
 
                   {columns.cdd && (
-                    <td className={`px-3 py-2 text-11 font-semibold ${CDD_STYLE[s.cddPosture]}`}>{s.cddPosture}</td>
+                    <td className={`px-3 py-2 text-11 font-semibold ${CDD_STYLE[s.cddPosture]}`}>
+                      {s.cddPosture}
+                    </td>
                   )}
 
-                  {columns.sla && <td className="px-3 py-2 text-11 font-mono text-ink-2">{s.slaNotify}</td>}
+                  {columns.sla && (
+                    <td className="px-3 py-2 text-11 font-mono text-ink-2">{s.slaNotify}</td>
+                  )}
 
                   {columns.lists && (
                     <td className="px-3 py-2">
@@ -224,7 +271,10 @@ export function ScreeningTable({
                           <span className="text-10 text-ink-3">—</span>
                         ) : (
                           s.listCoverage.map((l) => (
-                            <span key={l} className="text-10 font-mono bg-bg-2 border border-hair-2 rounded px-1 text-ink-2">
+                            <span
+                              key={l}
+                              className="text-10 font-mono bg-bg-2 border border-hair-2 rounded px-1 text-ink-2"
+                            >
                               {l}
                             </span>
                           ))
@@ -246,7 +296,9 @@ export function ScreeningTable({
                         title="Compare"
                         onClick={() => onToggleCompare(s.id)}
                         className={`text-11 px-1.5 py-0.5 rounded border transition-colors ${
-                          inCompare ? "border-brand/40 text-brand bg-brand-dim" : "border-hair-2 text-ink-3 hover:text-ink-1"
+                          inCompare
+                            ? "border-brand/40 text-brand bg-brand-dim"
+                            : "border-hair-2 text-ink-3 hover:text-ink-1"
                         }`}
                       >
                         ⇔

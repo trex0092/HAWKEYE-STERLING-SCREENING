@@ -180,7 +180,10 @@ export function SubjectDetailPanel({
         ) : (
           <div className="flex flex-wrap gap-1">
             {subject.listCoverage.map((l) => (
-              <span key={l} className="text-10 font-mono bg-bg-2 border border-hair-2 rounded px-1.5 py-0.5 text-ink-2">
+              <span
+                key={l}
+                className="text-10 font-mono bg-bg-2 border border-hair-2 rounded px-1.5 py-0.5 text-ink-2"
+              >
                 {l}
               </span>
             ))}
@@ -193,7 +196,9 @@ export function SubjectDetailPanel({
         <div className="p-4 border-b border-hair-2 space-y-2">
           {subject.pep && (
             <div className="bg-amber-dim border border-amber/30 rounded p-2">
-              <div className="text-10 uppercase tracking-wide-3 text-amber font-semibold">PEP · {subject.pep.tier}</div>
+              <div className="text-10 uppercase tracking-wide-3 text-amber font-semibold">
+                PEP · {subject.pep.tier}
+              </div>
               <div className="text-11 text-ink-1">{subject.pep.rationale}</div>
             </div>
           )}
@@ -203,7 +208,8 @@ export function SubjectDetailPanel({
                 Adverse media · {subject.adverseMedia.score}
               </div>
               <div className="text-11 text-ink-1">
-                {subject.adverseMedia.source} · {subject.adverseMedia.reference} · {subject.adverseMedia.date}
+                {subject.adverseMedia.source} · {subject.adverseMedia.reference} ·{" "}
+                {subject.adverseMedia.date}
               </div>
             </div>
           )}
@@ -227,14 +233,18 @@ export function SubjectDetailPanel({
       {/* Triage resolutions */}
       {triageResolutions && triageResolutions.length > 0 && (
         <div className="p-4 border-b border-hair-2">
-          <div className="text-10 uppercase tracking-wide-3 text-ink-3 mb-1.5">Triage resolutions</div>
+          <div className="text-10 uppercase tracking-wide-3 text-ink-3 mb-1.5">
+            Triage resolutions
+          </div>
           <ul className="space-y-1.5">
             {triageResolutions.map((t) => (
               <li key={t.hitId} className="flex items-center gap-2 text-11">
                 <span className="font-mono text-ink-3 text-10">{t.sourceList}</span>
                 <span className="text-ink-1 truncate flex-1">{t.matchedName}</span>
                 <span className="font-mono text-ink-3 text-10">{t.matchStrength}%</span>
-                <span className={`text-10 font-semibold uppercase ${RES_STYLE[t.resolution]}`}>{t.resolution}</span>
+                <span className={`text-10 font-semibold uppercase ${RES_STYLE[t.resolution]}`}>
+                  {t.resolution}
+                </span>
               </li>
             ))}
           </ul>

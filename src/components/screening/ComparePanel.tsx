@@ -56,12 +56,7 @@ const ROW_DEFS: ReadonlyArray<{ key: string; label: string }> = [
   { key: "slaNotify", label: "SLA notify" },
 ];
 
-export function ComparePanel({
-  subjectA,
-  subjectB,
-  onClose,
-  onSelect,
-}: ComparePanelProps) {
+export function ComparePanel({ subjectA, subjectB, onClose, onSelect }: ComparePanelProps) {
   const rows: CompareRow[] = ROW_DEFS.map((def) => ({
     key: def.key,
     label: def.label,
@@ -109,28 +104,15 @@ export function ComparePanel({
           return (
             <div
               key={row.key}
-              className={
-                "grid grid-cols-2 gap-2 py-1.5 " +
-                (differs ? "bg-amber-dim/40" : "")
-              }
+              className={"grid grid-cols-2 gap-2 py-1.5 " + (differs ? "bg-amber-dim/40" : "")}
             >
               <div className="col-span-2 text-10 uppercase tracking-wide-3 text-ink-3">
                 {row.label}
               </div>
-              <div
-                className={
-                  "break-words text-11 " +
-                  (differs ? "text-amber" : "text-ink-2")
-                }
-              >
+              <div className={"break-words text-11 " + (differs ? "text-amber" : "text-ink-2")}>
                 {row.a}
               </div>
-              <div
-                className={
-                  "break-words text-11 " +
-                  (differs ? "text-amber" : "text-ink-2")
-                }
-              >
+              <div className={"break-words text-11 " + (differs ? "text-amber" : "text-ink-2")}>
                 {row.b}
               </div>
             </div>

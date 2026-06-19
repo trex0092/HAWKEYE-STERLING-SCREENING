@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 
 function hash(s: string): number {
   let h = 2166136261;
-  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
   return Math.abs(h >>> 0);
 }
 
@@ -14,7 +17,7 @@ type NewHit = { subjectId: string; subjectName: string; hitType: string; severit
 type Cleared = { subjectId: string; subjectName: string };
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({})) as BulkRescreenBody;
+  const body = (await req.json().catch(() => ({}))) as BulkRescreenBody;
   const list = Array.isArray(body.subjects) ? body.subjects : [];
 
   const hitTypes = ["OFAC SDN", "UN 1267", "EU Consolidated", "UK OFSI"] as const;
