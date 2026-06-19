@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Dark design system. Colours are space-separated RGB channels (no rgb()
+ * wrapper) so Tailwind's `rgb(var(--x) / <alpha-value>)` tokens + slash
+ * opacity modifiers resolve correctly.
+ */
+:root {
+  --bg: 11 13 20;
+  --bg-1: 18 21 30;
+  --bg-2: 24 28 38;
+  --bg-panel: 15 18 27;
+
+  --ink-0: 237 240 247;
+  --ink-1: 198 203 215;
+  --ink-2: 148 156 172;
+  --ink-3: 104 112 128;
+  --fg-muted: 130 138 154;
+
+  --brand: 124 92 246;
+  --brand-dim: 33 26 58;
+  --brand-line: 44 38 70;
+  --accent: 99 102 241;
+  --violet: 139 92 246;
+
+  --hair: 31 36 48;
+  --hair-2: 45 51 66;
+
+  --red: 239 68 68;
+  --red-dim: 46 20 24;
+  --amber: 245 176 65;
+  --amber-dim: 47 36 18;
+  --green: 52 199 123;
+  --green-dim: 16 40 29;
+  --orange: 251 146 60;
+}
+
+html,
+body {
+  background-color: rgb(var(--bg));
+  color: rgb(var(--ink-1));
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+}
+
+* {
+  border-color: rgb(var(--hair));
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--hair-2));
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
