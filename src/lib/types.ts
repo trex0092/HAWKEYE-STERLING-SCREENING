@@ -82,6 +82,8 @@ export interface Subject {
   openedAgo: string;
   openedAt?: string;
   assignedTo?: string;
+  /** Console: assigned AI-analyst persona id (see src/lib/data/operators.ts). */
+  analyst?: string;
   snoozedUntil?: string;
   snoozeReason?: string;
   notes?: string;

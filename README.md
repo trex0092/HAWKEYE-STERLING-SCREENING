@@ -10,10 +10,13 @@ workspace for triaging subjects against sanctions lists, PEP databases, adverse
 media, and corporate/ownership intelligence.
 
 > [!IMPORTANT]
-> **Demo / reference build.** This project runs **fully offline**: every `/api/*`
-> route is a deterministic **mock** that returns synthetic data — there are **no
-> external calls, no API keys, and no real sanctions data**. It is intended as a
-> UI/architecture reference, **not** a production screening system. Do not use it
+> **Demo / reference build.** Out of the box this project runs **fully offline**:
+> every `/api/*` route returns deterministic **mock** data with no external calls
+> or keys. Optional integrations — **Asana** case sync, free **Google News**
+> adverse media, free/open **OpenSanctions** lists, and **Anthropic (Claude)**
+> enrichment — activate only when their environment variables are set (see
+> [Configuration](#configuration)) and otherwise degrade to the mocks. It is a
+> UI/architecture reference, **not** a production screening system; do not use it
 > to make real compliance decisions.
 
 ---
@@ -133,12 +136,24 @@ container build is defined by the root `Dockerfile`.
 | `/api/sanctions/operator-refresh` | POST | Kick off a sanctions refresh job |
 | `/api/sanctions/refresh-status/[jobId]` | GET | Poll refresh job status |
 | `/api/sanctions/last-errors` | GET | Last sanctions ingestion errors |
+| `/api/asana/sync` | GET/POST | Push a case to Asana (mock without a token) |
+| `/api/adverse-media/news` | GET | Free Google-News adverse-media feed (seed offline) |
+| `/api/sanctions/sources` | GET | Watchlist sources — live OpenSanctions or seed |
+| `/api/sanctions/screen` | POST | Name-match against open sanctions data |
 
 ## Configuration
+
+All integrations degrade to deterministic mocks when their variable is unset, so
+the app builds, tests and runs fully offline. Set these to go live:
 
 | Variable | Default | Description |
 |---|---|---|
 | `NEXT_PUBLIC_COMTRADE_ENABLED` | `false` | Set `true` to render the UN Comtrade panel |
+| `ANTHROPIC_API_KEY` | _(unset)_ | Enable Claude (`claude-opus-4-8`) media/screening enrichment |
+| `ASANA_ACCESS_TOKEN` | _(unset)_ | Personal access token for `/api/asana/sync` (else mock) |
+| `ASANA_PROJECT_ID` / `ASANA_WORKSPACE_ID` | _(unset)_ | Where synced Asana tasks land |
+| `ADVERSE_MEDIA_LIVE` | `false` | `true` pulls live free Google-News headlines |
+| `SANCTIONS_LIVE` | `false` | `true` reads live free OpenSanctions list data |
 
 ## Contributing
 
