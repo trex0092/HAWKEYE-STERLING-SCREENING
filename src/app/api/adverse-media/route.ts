@@ -3,38 +3,30 @@ import { fetchAdverseMedia } from "@/lib/integrations/adverse-media";
 import { liveEnabled } from "@/lib/integrations/config";
 
 // ── Adverse-media verdict ────────────────────────────────────────────────────
-// Deterministic, offline verdict derived from a hash of the subject name (the
-// page's existing contract). When ADVERSE_MEDIA_LIVE=true it additionally pulls
-// free Google-News headlines and nudges the tier up if negative coverage is
-// found. The offline path is unchanged so tests stay deterministic.
+// Honest by design: the risk tier is derived ONLY from real coverage. When a
+// free Google-News source is live, the tier reflects how much negative news is
+// actually found. With no live source there is nothing to judge, so the verdict
+// is "clear" with no headlines — never a fabricated tier from a name hash.
 
 export const dynamic = "force-dynamic";
-
-function hash(s: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h >>> 0);
-}
 
 type AdverseMediaBody = { subject?: string; limit?: number };
 
 const TIERS = ["clear", "low", "medium", "high", "critical"] as const;
 type Tier = (typeof TIERS)[number];
 
+function tierForNegativeCount(n: number): Tier {
+  if (n >= 5) return "critical";
+  if (n >= 3) return "high";
+  if (n >= 1) return "medium";
+  return "clear";
+}
+
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as AdverseMediaBody;
   const name = body.subject ?? "";
 
-  let riskTier: Tier;
-  if (name.toLowerCase().includes("test")) {
-    riskTier = "clear";
-  } else {
-    riskTier = TIERS[hash(name) % 5] ?? "clear";
-  }
-
+  let riskTier: Tier = "clear";
   let live = false;
   let headlines: Awaited<ReturnType<typeof fetchAdverseMedia>>["hits"] | undefined;
 
@@ -42,8 +34,9 @@ export async function POST(req: Request) {
     const result = await fetchAdverseMedia(name);
     live = result.live;
     headlines = result.hits.slice(0, 5);
-    if (live && result.hits.some((h) => h.sent === "negative")) {
-      if (riskTier === "clear" || riskTier === "low") riskTier = "medium";
+    if (live) {
+      const negatives = result.hits.filter((h) => h.sent === "negative").length;
+      riskTier = tierForNegativeCount(negatives);
     }
   }
 
