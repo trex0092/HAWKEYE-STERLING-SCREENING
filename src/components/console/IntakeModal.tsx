@@ -21,12 +21,28 @@ const input: CSSProperties = {
   borderRadius: 7,
   color: "#EDEFF4",
   padding: "9px 11px",
-  fontSize: 14,
+  // 16px keeps mobile Safari from auto-zooming when a field is focused.
+  fontSize: 16,
   fontFamily: "'Arial Narrow',sans-serif",
   outline: "none",
+  maxWidth: "100%",
+  boxSizing: "border-box",
 };
 
-const select: CSSProperties = { ...input, fontSize: 13.5, cursor: "pointer" };
+const select: CSSProperties = { ...input, cursor: "pointer" };
+
+// Two- and three-column rows collapse to fewer columns as the modal narrows on
+// phones, instead of squeezing fixed tracks into unreadable widths.
+const grid2: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 14,
+};
+const grid3: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+  gap: 14,
+};
 
 export function IntakeModal({
   draft,
@@ -51,7 +67,7 @@ export function IntakeModal({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 24,
+        padding: "clamp(8px, 3vw, 24px)",
         background: "rgba(4,6,11,0.74)",
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
@@ -146,7 +162,7 @@ export function IntakeModal({
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div style={grid2}>
             <div>
               <label style={label}>Entity type</label>
               <select
@@ -202,7 +218,7 @@ export function IntakeModal({
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div style={grid2}>
             <div>
               <label style={label}>Date of birth / registration</label>
               <input
@@ -240,7 +256,7 @@ export function IntakeModal({
             >
               Identification Number
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+            <div style={grid3}>
               <div>
                 <label style={label}>ID number</label>
                 <input
@@ -332,6 +348,7 @@ export function IntakeModal({
           style={{
             display: "flex",
             alignItems: "center",
+            flexWrap: "wrap",
             gap: 9,
             padding: "14px 20px",
             borderTop: "1px solid rgba(255,255,255,0.07)",
@@ -340,7 +357,7 @@ export function IntakeModal({
           <span style={{ fontSize: 11, color: "#646F86", letterSpacing: "0.02em" }}>
             A case is opened and assigned to an AI analyst on run.
           </span>
-          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
               type="button"
               onClick={onClose}

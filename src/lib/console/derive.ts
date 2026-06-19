@@ -178,7 +178,7 @@ export function analystForType(t: string): string {
 
 const COUNTRY_RISK: Record<string, number> = {
   RUSSIA: 42,
-  "UNITED ARAB EMIR": 22,
+  "UNITED ARAB EMIRATES": 22,
   SEYCHELLES: 30,
   PANAMA: 26,
   EGYPT: 18,

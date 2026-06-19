@@ -10,6 +10,7 @@ import {
   WALLETS,
   VESSELS,
   AUDIT,
+  COUNTRY_CODES,
   type ModuleKey,
   type SanctionSourceRow,
   type MediaHit,
@@ -45,20 +46,8 @@ import { ModuleBrief, type BriefItem } from "@/components/console/ModuleBrief";
 import { IntakeModal } from "@/components/console/IntakeModal";
 import { EMPTY_DRAFT, type ConsoleSettings, type Density, type Draft } from "@/components/console/types";
 
-const CC: Record<string, string> = {
-  "UNITED KINGDOM": "GB",
-  GERMANY: "DE",
-  JORDAN: "JO",
-  EGYPT: "EG",
-  "UNITED ARAB EMIR": "AE",
-  PANAMA: "PA",
-  SEYCHELLES: "SC",
-  RUSSIA: "RU",
-  "UNITED STATES": "US",
-  SINGAPORE: "SG",
-  SWITZERLAND: "CH",
-  "HONG KONG": "HK",
-};
+// Country display name → ISO code, sourced from the full console country list.
+const CC: Record<string, string> = COUNTRY_CODES;
 
 const TYPE_LABEL: Record<Draft["type"], string> = {
   individual: "Individual",
