@@ -64,6 +64,12 @@ interface QuickScreenResult {
   lists?: string[];
   topScore?: number;
   reasoning?: { decision?: "clear" | "review" | "escalate" | "block" };
+  adverseMedia?: {
+    live: boolean;
+    negativeCount: number;
+    totalCount: number;
+    score: number;
+  };
 }
 
 const STATUS_BY_DECISION: Record<string, SubjectStatus> = {
@@ -344,6 +350,9 @@ export default function ScreeningConsole() {
         : [];
       const score = v.topScore ?? 0;
       const status = STATUS_BY_DECISION[v.reasoning?.decision ?? "review"] ?? "review";
+      const amCount = v.adverseMedia?.negativeCount ?? 0;
+      const amNote =
+        amCount > 0 ? ` · ${amCount} adverse-media hit${amCount > 1 ? "s" : ""}` : "";
       setSubjects((prev) =>
         prev.map((s) =>
           s.id === created.id
@@ -354,7 +363,8 @@ export default function ScreeningConsole() {
                 listCoverage: lists,
                 mostSerious: severityWord(score).w,
                 rca: { screened: Boolean(v.live) },
-                meta: v.live ? s.meta : `${s.meta} · not screened (no live list source)`,
+                meta:
+                  (v.live ? s.meta : `${s.meta} · not screened (no live list source)`) + amNote,
                 ...(v.live && v.pep
                   ? { pep: { tier: "Match", rationale: "OpenSanctions PEP record" } }
                   : {}),
@@ -369,9 +379,13 @@ export default function ScreeningConsole() {
             ? "Sanctions hit on screen"
             : v.pep
               ? "PEP hit on screen"
-              : "Screened — clear"
-          : "Not screened — no live list source",
-        `${created.id} · ${created.name}${lists.length ? ` · ${lists.join("/")}` : ""}`,
+              : amCount > 0
+                ? "Adverse media hit on screen"
+                : "Screened — clear"
+          : amCount > 0
+            ? "Adverse media hit — lists not screened"
+            : "Not screened — no live list source",
+        `${created.id} · ${created.name}${lists.length ? ` · ${lists.join("/")}` : ""}${amNote}`,
       );
     })();
   }

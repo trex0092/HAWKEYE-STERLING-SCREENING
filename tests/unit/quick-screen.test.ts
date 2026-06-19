@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { POST } from "@/app/api/quick-screen/route";
+import { describe, it, expect, vi } from "vitest";
+import { POST, adverseMediaScore } from "@/app/api/quick-screen/route";
 
 function post(body: unknown): Promise<Response> {
   return POST(
@@ -46,5 +46,56 @@ describe("POST /api/quick-screen", () => {
     expect(data.lists).toEqual([]);
     expect(data.hits).toEqual([]);
     expect(data.topScore).toBe(0);
+  });
+
+  it("scales the adverse-media score with negative coverage volume", () => {
+    expect(adverseMediaScore(0)).toBe(0);
+    expect(adverseMediaScore(1)).toBe(35);
+    expect(adverseMediaScore(3)).toBe(55);
+    expect(adverseMediaScore(5)).toBe(65);
+    expect(adverseMediaScore(8)).toBe(75);
+    // Adverse media alone never reaches the auto-block band (>=90).
+    expect(adverseMediaScore(100)).toBeLessThan(90);
+  });
+});
+
+// Adverse media must drive the verdict even when the list source is unreachable.
+describe("POST /api/quick-screen — adverse media wiring", () => {
+  it("raises the score and routes to review/escalate on negative press", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/integrations/adverse-media", () => ({
+      fetchAdverseMedia: async () => ({
+        live: true,
+        hits: Array.from({ length: 6 }, (_, i) => ({
+          subject: "Ozcan Halac",
+          cat: "News",
+          source: "Reuters",
+          date: "06 Oct 2025",
+          sent: "negative" as const,
+          headline: `Istanbul gold refinery fraud probe ${i}`,
+          url: "https://example.com",
+        })),
+      }),
+    }));
+    const { POST: PostWithMock } = await import("@/app/api/quick-screen/route");
+    const res = await PostWithMock(
+      new Request("http://localhost/api/quick-screen", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ subject: { name: "Ozcan Halac", jurisdiction: "TR" } }),
+      }),
+    );
+    const data = await res.json();
+    // No live LIST source in test, but adverse media is live and must surface.
+    expect(data.live).toBe(false);
+    expect(data.sanctioned).toBe(false);
+    expect(data.adverseMedia.negativeCount).toBe(6);
+    expect(data.topScore).toBe(75);
+    expect(["review", "escalate"]).toContain(data.reasoning.decision);
+    expect(data.reasoning.factors.some((f: { label: string }) => f.label === "Adverse media")).toBe(
+      true,
+    );
+    vi.doUnmock("@/lib/integrations/adverse-media");
+    vi.resetModules();
   });
 });
