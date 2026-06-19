@@ -1,12 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/*
- * Dark design system. Colours are space-separated RGB channels (no rgb()
- * wrapper) so Tailwind's `rgb(var(--x) / <alpha-value>)` tokens + slash
- * opacity modifiers resolve correctly.
- */
+/* ── Design system (Tailwind v4 @theme) ──────────────────────────────────────
+   Colours reference the space-separated RGB channel vars defined in :root so
+   v4 can apply `/opacity` modifiers via color-mix(). Default Tailwind colour
+   scales (red-950, emerald-300, …) used by the screening page remain available
+   from v4's bundled theme. */
+@theme {
+  --color-bg: rgb(var(--bg));
+  --color-bg-1: rgb(var(--bg-1));
+  --color-bg-2: rgb(var(--bg-2));
+  --color-bg-panel: rgb(var(--bg-panel));
+
+  --color-ink-0: rgb(var(--ink-0));
+  --color-ink-1: rgb(var(--ink-1));
+  --color-ink-2: rgb(var(--ink-2));
+  --color-ink-3: rgb(var(--ink-3));
+  --color-fg-muted: rgb(var(--fg-muted));
+
+  --color-brand: rgb(var(--brand));
+  --color-brand-dim: rgb(var(--brand-dim));
+  --color-brand-line: rgb(var(--brand-line));
+  --color-accent: rgb(var(--accent));
+  --color-violet: rgb(var(--violet));
+
+  --color-hair: rgb(var(--hair));
+  --color-hair-2: rgb(var(--hair-2));
+
+  --color-red: rgb(var(--red));
+  --color-red-dim: rgb(var(--red-dim));
+  --color-amber: rgb(var(--amber));
+  --color-amber-dim: rgb(var(--amber-dim));
+  --color-green: rgb(var(--green));
+  --color-green-dim: rgb(var(--green-dim));
+  --color-orange: rgb(var(--orange));
+
+  --text-10: 10px;
+  --text-11: 11px;
+  --text-12: 12px;
+
+  --tracking-wide-3: 0.03em;
+}
+
+/* The decimal-named font-size utility the screening page uses — a dotted token
+   name can't be expressed as a @theme key, so define the utility directly. */
+@layer utilities {
+  .text-10\.5 {
+    font-size: 10.5px;
+    line-height: 15px;
+  }
+}
+
+/* Raw RGB channels (space-separated, no rgb() wrapper) referenced by the theme
+   tokens above and by the base styles below. */
 :root {
   --bg: 11 13 20;
   --bg-1: 18 21 30;
@@ -37,37 +82,42 @@
   --orange: 251 146 60;
 }
 
-html,
-body {
-  background-color: rgb(var(--bg));
-  color: rgb(var(--ink-1));
-  -webkit-font-smoothing: antialiased;
-}
+/* Base styles live in @layer base so utilities (border-*, bg-*, …) override
+   them — v4 uses real CSS cascade layers, where unlayered rules would otherwise
+   beat layered utilities. */
+@layer base {
+  html,
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--ink-1));
+    -webkit-font-smoothing: antialiased;
+  }
 
-body {
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
-}
+  body {
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      Helvetica,
+      Arial,
+      sans-serif;
+  }
 
-* {
-  border-color: rgb(var(--hair));
-}
+  * {
+    border-color: rgb(var(--hair));
+  }
 
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background: rgb(var(--hair-2));
-  border-radius: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--hair-2));
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
