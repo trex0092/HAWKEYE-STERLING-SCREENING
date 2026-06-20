@@ -161,7 +161,7 @@ the app builds, tests and runs fully offline. Set these to go live:
 | `ANTHROPIC_API_KEY` | _(unset)_ | Enable Claude (`claude-opus-4-8`) media/screening enrichment |
 | `ASANA_ACCESS_TOKEN` | _(unset)_ | Personal access token for `/api/asana/sync` (else mock) |
 | `ASANA_PROJECT_ID` / `ASANA_WORKSPACE_ID` | _(unset)_ | Where synced Asana tasks land |
-| `ADVERSE_MEDIA_LIVE` | _(prod: on)_ | Free Google-News headlines. On in production, off in dev/test; set `true`/`false` to override |
+| `ADVERSE_MEDIA_LIVE` | _(live)_ | Free Google-News headlines, **worldwide**: every major locale edition (US, UK, Türkiye, Arabic, Russia, China, …) searched in parallel and merged. Live everywhere (dev + prod); only unit tests use seed fixtures. Live results are never replaced with mock data. Set `false` to force seed-only |
 | `SANCTIONS_LIVE` | _(prod: on)_ | Free OpenSanctions sanctions **+ PEP** data powering the real screening verdict. On in production, off in dev/test; set `true`/`false` to override |
 | `OPENSANCTIONS_API_URL` | public API | Point at a self-hosted [yente](https://www.opensanctions.org/docs/yente/) for unlimited, rate-limit-free matching (still free) |
 | `OPENSANCTIONS_INDEX_URL` | public index | Dataset metadata index URL (override when self-hosting) |

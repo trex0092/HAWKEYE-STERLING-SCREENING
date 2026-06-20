@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { fetchAdverseMedia } from "@/lib/integrations/adverse-media";
 
-// Negative-news feed for the Adverse Media module. Pulls free Google News RSS
-// when ADVERSE_MEDIA_LIVE=true, otherwise returns deterministic seed hits.
+// Negative-news feed for the Adverse Media module. Live by default (dev + prod):
+// pulls free Google News RSS for real coverage. Only the unit-test runner (or an
+// explicit ADVERSE_MEDIA_LIVE=false) returns deterministic seed hits instead.
 
 export const dynamic = "force-dynamic";
 
