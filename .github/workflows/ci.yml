@@ -44,3 +44,6 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Keep CI builds fast and hermetic; the screening index is built on deploy.
+          SKIP_SANCTIONS_INDEX: "1"

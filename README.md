@@ -162,17 +162,23 @@ the app builds, tests and runs fully offline. Set these to go live:
 | `ASANA_ACCESS_TOKEN` | _(unset)_ | Personal access token for `/api/asana/sync` (else mock) |
 | `ASANA_PROJECT_ID` / `ASANA_WORKSPACE_ID` | _(unset)_ | Where synced Asana tasks land |
 | `ADVERSE_MEDIA_LIVE` | _(live)_ | Free Google-News headlines, **worldwide**: every major locale edition (US, UK, Türkiye, Arabic, Russia, China, …) searched in parallel and merged. Live everywhere (dev + prod); only unit tests use seed fixtures. Live results are never replaced with mock data. Set `false` to force seed-only |
-| `SANCTIONS_LIVE` | _(prod: on)_ | Free OpenSanctions sanctions **+ PEP** data powering the real screening verdict. On in production, off in dev/test; set `true`/`false` to override |
-| `OPENSANCTIONS_API_URL` | public API | Point at a self-hosted [yente](https://www.opensanctions.org/docs/yente/) for unlimited, rate-limit-free matching (still free) |
+| `SKIP_SANCTIONS_INDEX` | _(unset)_ | Set `1` to skip the build-time sanctions/PEP index download (used by CI for fast, hermetic builds) |
+| `OPENSANCTIONS_DATA_BASE` | OpenSanctions latest | Base URL for the free OpenSanctions data exports the index is built from |
+| `SANCTIONS_INDEX_MAX` | `1500000` | Cap on the number of indexed entities (bound bundle size / build memory) |
+| `SANCTIONS_LIVE` | _(unset)_ | Optional remote OpenSanctions/yente API fallback, used **only** when no local index is bundled |
+| `OPENSANCTIONS_API_URL` | public API | Point the optional remote fallback at a self-hosted [yente](https://www.opensanctions.org/docs/yente/) |
 | `OPENSANCTIONS_INDEX_URL` | public index | Dataset metadata index URL (override when self-hosting) |
 
-> **All-free data:** **Google-News** adverse media needs no key and works as
-> soon as the deploy has outbound network. **OpenSanctions** sanctions + PEP
-> matching is also 100% free, but the *public hosted* API is now key-gated
-> (returns `403` without a subscription), so for the zero-cost live path point
-> `OPENSANCTIONS_API_URL` at a **self-hosted [yente](https://www.opensanctions.org/docs/yente/)**
-> (see below). Without it the console gracefully serves deterministic results.
-> Claude and Asana remain optional.
+> **All-free data:** sanctions **+ PEP** screening needs **no API key**. At build
+> time, `scripts/build-sanctions-index.mjs` downloads the free, openly-licensed
+> OpenSanctions consolidated lists (OFAC, UN, EU, UK, Interpol) and PEP dataset
+> and compiles a compact index that ships inside the deploy and is matched
+> **in-process at runtime** — no key, no per-request network, serverless-friendly.
+> **Google-News** adverse media is likewise free and worldwide. The build is
+> resilient: if the data can't be fetched it writes an empty index and the console
+> reports an honest "not screened" rather than fabricating a verdict. A remote
+> yente/OpenSanctions API (`SANCTIONS_LIVE` + `OPENSANCTIONS_API_URL`) remains an
+> optional fallback for when no index is bundled. Claude and Asana stay optional.
 
 ### Run yente locally (free live sanctions + PEP)
 

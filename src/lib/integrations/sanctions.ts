@@ -10,6 +10,7 @@ import {
   opensanctionsApiBase,
   opensanctionsIndexUrl,
 } from "@/lib/integrations/config";
+import { searchLocalIndex } from "@/lib/integrations/sanctions-index";
 import { SOURCES, type SanctionSourceRow } from "@/lib/data/console-datasets";
 import type { SanctionSource } from "@/lib/types";
 
@@ -116,10 +117,21 @@ interface OsSearchResult {
   }>;
 }
 
-/** Match a name against the public OpenSanctions search API, or null offline. */
+/**
+ * Match a name against the free sanctions/PEP sources. Prefers the bundled,
+ * keyless local index (compiled at build time); only when no index is present
+ * does it fall back to a configured OpenSanctions/yente API (SANCTIONS_LIVE).
+ * Returns null when no source is available → honest "not screened".
+ */
 export async function screenName(name: string): Promise<SanctionMatch[] | null> {
-  const live = liveEnabled("SANCTIONS_LIVE");
-  if (!live || !name.trim()) return null;
+  if (!name.trim()) return null;
+
+  // 1) Free, in-process index (no key, no network). null = no bundle present.
+  const local = searchLocalIndex(name);
+  if (local !== null) return local;
+
+  // 2) Optional remote OpenSanctions/yente API (off unless explicitly enabled).
+  if (!liveEnabled("SANCTIONS_LIVE")) return null;
 
   const url = `${opensanctionsApiBase()}/search/default?q=${encodeURIComponent(name)}&limit=5`;
   const res = await fetchJsonWithTimeout(url, {}, 8000);
