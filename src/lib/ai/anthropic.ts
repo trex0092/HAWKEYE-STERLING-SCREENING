@@ -14,6 +14,19 @@ import {
   type ScreeningReasoning,
 } from "./coerce";
 import { hashText, recordLlmCall } from "./llm-log";
+import { detectThreats } from "../threat";
+
+/**
+ * Scan untrusted input headed for the model for prompt-injection / jailbreak
+ * patterns. Advisory: we record a TRACE entry so a flagged input is visible in
+ * the call log, then let coercion guard the output. Never throws.
+ */
+function recordThreatScan(task: string, model: string, promptHash: string, text: string): void {
+  const scan = detectThreats(text);
+  if (!scan.clean) {
+    recordLlmCall({ task: `threat:${task}`, model, promptHash, outcome: "rejected", ms: 0 });
+  }
+}
 
 // Re-export the coerced output types so existing importers stay stable.
 export type { MediaClassification, ScreeningReasoning };
@@ -63,6 +76,7 @@ export async function classifyAdverseMedia(
   if (!client) return null;
   const started = Date.now();
   const promptHash = hashText(`${subject}\n${headline}`);
+  recordThreatScan("classifyAdverseMedia", MODEL, promptHash, headline);
   try {
     const res = await client.messages.create({
       model: MODEL,
@@ -105,6 +119,7 @@ export async function screeningReasoning(
     subject.riskScore ?? "?"
   }\nLists: ${(subject.lists ?? []).join(", ") || "none"}\nHits: ${hits.join("; ") || "none"}`;
   const promptHash = hashText(content);
+  recordThreatScan("screeningReasoning", MODEL, promptHash, content);
   try {
     const res = await client.messages.create({
       model: MODEL,

@@ -54,6 +54,7 @@ is mostly explainable and reproducible.
 | [`incident-response.md`](./incident-response.md) | Severity levels, roles, response steps, runbooks. | Layer 3 |
 | [`framework-mapping.md`](./framework-mapping.md) | Control mapping to NIST AI RMF, ISO/IEC 42001, EU AI Act. | Layer 6 |
 | [`six-layer-alignment.md`](./six-layer-alignment.md) | Full 6-layer alignment assessment with file references and remaining backlog. | All |
+| [`periodic-table-mapping.md`](./periodic-table-mapping.md) | Per-block coverage of the *AI Governance & Security Periodic Table (2026)* against the code. | All |
 
 ## Scope & disclaimer
 

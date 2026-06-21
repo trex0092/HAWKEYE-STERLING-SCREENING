@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { authorize } from "@/lib/auth/rbac";
+import { maskValue } from "@/lib/mask";
 
 // ── Audit-log export ─────────────────────────────────────────────────────────
 // Produces a portable, integrity-stamped export of the audit trail for a
@@ -18,6 +19,8 @@ interface AuditEntryInput {
 
 interface Body {
   entries?: AuditEntryInput[];
+  /** When true, redact PII (actor/target) before emitting + hashing the CSV. */
+  mask?: boolean;
 }
 
 function csvCell(v: string): string {
@@ -33,12 +36,13 @@ export async function POST(req: Request) {
 
   const body = (await req.json().catch(() => ({}))) as Body;
   const entries = Array.isArray(body.entries) ? body.entries : [];
+  const masked = body.mask === true;
 
   const rows = entries.map((e) => ({
     ts: String(e.ts ?? ""),
-    actor: String(e.actor ?? ""),
+    actor: masked ? maskValue(String(e.actor ?? "")) : String(e.actor ?? ""),
     action: String(e.action ?? ""),
-    target: String(e.target ?? ""),
+    target: masked ? maskValue(String(e.target ?? "")) : String(e.target ?? ""),
   }));
 
   const header = "ts,actor,action,target";
@@ -56,6 +60,7 @@ export async function POST(req: Request) {
     csv,
     algo: "SHA-256",
     contentHash,
+    masked,
     exportedBy: authz.identity?.actor,
     exportedAt: new Date().toISOString(),
   });

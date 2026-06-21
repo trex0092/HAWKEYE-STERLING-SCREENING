@@ -135,6 +135,21 @@ design of most automation keeps agentic risk low. Remaining work is **production
 
 ---
 
+## Periodic-table coverage pass (in-app controls)
+
+A follow-up pass mapped the platform against the *AI Governance & Security Periodic Table
+(2026)* and built every block that is satisfiable in application code: ABAC
+(`src/lib/auth/abac.ts`), anomaly detection (`src/lib/anomaly.ts`), usage analytics
+(`src/lib/usage.ts`), latency/health metrics (`src/lib/metrics.ts`), PII masking
+(`src/lib/mask.ts`), tokenization (`src/lib/tokenize.ts`), root-cause/override aggregation
+(`src/lib/rcause.ts`), and an AI threat detector (`src/lib/threat.ts`, wired into the LLM
+input path). Existing controls were hardened: the `override` route is now RBAC-gated (ZTA),
+audit export gained opt-in PII masking, and outbound HTTP is blocked to non-loopback plaintext
+hosts (ENC in-transit). Full per-block status: [`periodic-table-mapping.md`](./periodic-table-mapping.md).
+Out-of-scope blocks (SSO, MFA, real IAM, encryption-at-rest, durable sink, VDB; plus
+EU-AI-Act/ISO/GDPR sign-offs) remain in the backlog below — each needs a vendor, a datastore,
+or a legal decision rather than app code.
+
 ## What changed in this pass (new code)
 
 | Area | Files |
