@@ -235,7 +235,7 @@ export function ScreeningTable({
                           <div className="w-20 h-1.5 rounded bg-bg-2 overflow-hidden">
                             <div
                               className={`h-full ${riskColor(s.riskScore)}`}
-                              style={{ width: `${s.riskScore}%` }}
+                              style={{ width: `${Math.max(0, Math.min(100, s.riskScore))}%` }}
                             />
                           </div>
                           <span className="text-11 font-mono text-ink-1 w-6">{s.riskScore}</span>

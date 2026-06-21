@@ -15,6 +15,7 @@ type BulkRescreenBody = { subjects?: Subject[]; listVersion?: string };
 type Severity = "critical" | "high" | "medium" | "low";
 type NewHit = { subjectId: string; subjectName: string; hitType: string; severity: Severity };
 type Cleared = { subjectId: string; subjectName: string };
+type NoChange = { subjectId: string; subjectName: string };
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as BulkRescreenBody;
@@ -39,11 +40,18 @@ export async function POST(req: Request) {
     .filter((s) => hash(s.name) % 3 === 1)
     .map((s) => ({ subjectId: s.id, subjectName: s.name }));
 
+  // Every subject must receive an explicit disposition: a re-screen that
+  // silently drops a third of the portfolio is a coverage gap, not "clean".
+  const noChange: NoChange[] = list
+    .filter((s) => hash(s.name) % 3 === 2)
+    .map((s) => ({ subjectId: s.id, subjectName: s.name }));
+
   return NextResponse.json({
     ok: true,
     rescreened: list.length,
     newHits,
     cleared,
-    summary: `Re-screened ${list.length} subjects against list version ${body.listVersion ?? "latest"} — ${newHits.length} new hit(s), ${cleared.length} cleared.`,
+    noChange,
+    summary: `Re-screened ${list.length} subjects against list version ${body.listVersion ?? "latest"} — ${newHits.length} new hit(s), ${cleared.length} cleared, ${noChange.length} unchanged.`,
   });
 }

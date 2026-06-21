@@ -24,6 +24,24 @@ describe("POST /api/screening/bulk-rescreen", () => {
     }
   });
 
+  it("gives every subject a disposition (no silent drops)", async () => {
+    const subjects = Array.from({ length: 30 }, (_, i) => ({
+      id: `HS-${i}`,
+      name: `Subject ${i}`,
+    }));
+    const res = await POST(
+      new Request("http://localhost/api/screening/bulk-rescreen", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ subjects }),
+      }),
+    );
+    const data = await res.json();
+    const covered = data.newHits.length + data.cleared.length + data.noChange.length;
+    expect(covered).toBe(data.rescreened);
+    expect(covered).toBe(subjects.length);
+  });
+
   it("handles an empty portfolio", async () => {
     const res = await POST(
       new Request("http://localhost/api/screening/bulk-rescreen", {

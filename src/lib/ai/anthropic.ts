@@ -110,10 +110,23 @@ export async function screeningReasoning(
     });
     const parsed = safeJson<ScreeningReasoning>(firstText(res));
     if (!parsed) return null;
+    // The model's free-text fields are untrusted: a `decision` outside the
+    // allowed set or an out-of-range `score` must never reach a typed compliance
+    // field. Coerce to a safe verdict (mirrors classifyAdverseMedia's whitelist).
+    const DECISIONS: ReadonlyArray<ScreeningReasoning["decision"]> = [
+      "clear",
+      "review",
+      "escalate",
+      "block",
+    ];
+    const decision = DECISIONS.includes(parsed.decision) ? parsed.decision : "review";
+    const score = Number.isFinite(parsed.score)
+      ? Math.max(0, Math.min(100, Math.round(parsed.score)))
+      : 0;
     return {
       summary: String(parsed.summary ?? ""),
-      decision: parsed.decision ?? "review",
-      score: Number.isFinite(parsed.score) ? parsed.score : 0,
+      decision,
+      score,
       factors: Array.isArray(parsed.factors) ? parsed.factors.map(String) : [],
     };
   } catch {

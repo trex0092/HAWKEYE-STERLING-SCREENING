@@ -64,7 +64,7 @@ const RESOLUTION_STYLE: Record<Resolution, string> = {
 
 function strengthColor(n: number): string {
   if (n >= 85) return "bg-red";
-  if (n >= 65) return "bg-amber";
+  if (n >= 60) return "bg-amber";
   return "bg-green";
 }
 
