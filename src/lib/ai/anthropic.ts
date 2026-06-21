@@ -7,6 +7,16 @@
 // calls — no sampling params, no thinking budget (removed on this model).
 
 import Anthropic from "@anthropic-ai/sdk";
+import {
+  coerceClassification,
+  coerceReasoning,
+  type MediaClassification,
+  type ScreeningReasoning,
+} from "./coerce";
+import { hashText, recordLlmCall } from "./llm-log";
+
+// Re-export the coerced output types so existing importers stay stable.
+export type { MediaClassification, ScreeningReasoning };
 
 let cached: Anthropic | null | undefined;
 
@@ -44,11 +54,6 @@ function safeJson<T>(text: string | null): T | null {
   }
 }
 
-export interface MediaClassification {
-  sentiment: "negative" | "positive" | "neutral";
-  category: string;
-}
-
 /** Classify a news headline's sentiment + a short category for a subject. */
 export async function classifyAdverseMedia(
   headline: string,
@@ -56,6 +61,8 @@ export async function classifyAdverseMedia(
 ): Promise<MediaClassification | null> {
   const client = getAnthropic();
   if (!client) return null;
+  const started = Date.now();
+  const promptHash = hashText(`${subject}\n${headline}`);
   try {
     const res = await client.messages.create({
       model: MODEL,
@@ -65,23 +72,25 @@ export async function classifyAdverseMedia(
         'return ONLY compact JSON: {"sentiment":"negative|positive|neutral","category":"<2-3 word category>"}.',
       messages: [{ role: "user", content: `Subject: ${subject}\nHeadline: ${headline}` }],
     });
-    const parsed = safeJson<MediaClassification>(firstText(res));
-    if (!parsed) return null;
-    const sentiment =
-      parsed.sentiment === "positive" || parsed.sentiment === "neutral"
-        ? parsed.sentiment
-        : "negative";
-    return { sentiment, category: parsed.category || "News" };
+    const parsed = coerceClassification(safeJson(firstText(res)));
+    recordLlmCall({
+      task: "classifyAdverseMedia",
+      model: MODEL,
+      promptHash,
+      outcome: parsed ? "ok" : "rejected",
+      ms: Date.now() - started,
+    });
+    return parsed;
   } catch {
+    recordLlmCall({
+      task: "classifyAdverseMedia",
+      model: MODEL,
+      promptHash,
+      outcome: "error",
+      ms: Date.now() - started,
+    });
     return null;
   }
-}
-
-export interface ScreeningReasoning {
-  summary: string;
-  decision: "clear" | "review" | "escalate" | "block";
-  score: number;
-  factors: string[];
 }
 
 /** Produce a short compliance screening rationale for a subject + its hits. */
@@ -91,6 +100,11 @@ export async function screeningReasoning(
 ): Promise<ScreeningReasoning | null> {
   const client = getAnthropic();
   if (!client) return null;
+  const started = Date.now();
+  const content = `Subject: ${subject.name}\nCountry: ${subject.country ?? "?"}\nRisk: ${
+    subject.riskScore ?? "?"
+  }\nLists: ${(subject.lists ?? []).join(", ") || "none"}\nHits: ${hits.join("; ") || "none"}`;
+  const promptHash = hashText(content);
   try {
     const res = await client.messages.create({
       model: MODEL,
@@ -99,37 +113,28 @@ export async function screeningReasoning(
         "You are an AML/sanctions screening analyst. Given a subject and its watchlist hits, return ONLY " +
         'compact JSON: {"summary":"<one sentence>","decision":"clear|review|escalate|block",' +
         '"score":<0-100>,"factors":["<short factor>", ...]}.',
-      messages: [
-        {
-          role: "user",
-          content: `Subject: ${subject.name}\nCountry: ${subject.country ?? "?"}\nRisk: ${
-            subject.riskScore ?? "?"
-          }\nLists: ${(subject.lists ?? []).join(", ") || "none"}\nHits: ${hits.join("; ") || "none"}`,
-        },
-      ],
+      messages: [{ role: "user", content }],
     });
-    const parsed = safeJson<ScreeningReasoning>(firstText(res));
-    if (!parsed) return null;
-    // The model's free-text fields are untrusted: a `decision` outside the
-    // allowed set or an out-of-range `score` must never reach a typed compliance
-    // field. Coerce to a safe verdict (mirrors classifyAdverseMedia's whitelist).
-    const DECISIONS: ReadonlyArray<ScreeningReasoning["decision"]> = [
-      "clear",
-      "review",
-      "escalate",
-      "block",
-    ];
-    const decision = DECISIONS.includes(parsed.decision) ? parsed.decision : "review";
-    const score = Number.isFinite(parsed.score)
-      ? Math.max(0, Math.min(100, Math.round(parsed.score)))
-      : 0;
-    return {
-      summary: String(parsed.summary ?? ""),
-      decision,
-      score,
-      factors: Array.isArray(parsed.factors) ? parsed.factors.map(String) : [],
-    };
+    // The model's free-text fields are untrusted; coerceReasoning forces the
+    // decision onto a whitelist and clamps the score before it reaches a typed
+    // compliance field.
+    const parsed = coerceReasoning(safeJson(firstText(res)));
+    recordLlmCall({
+      task: "screeningReasoning",
+      model: MODEL,
+      promptHash,
+      outcome: parsed ? "ok" : "rejected",
+      ms: Date.now() - started,
+    });
+    return parsed;
   } catch {
+    recordLlmCall({
+      task: "screeningReasoning",
+      model: MODEL,
+      promptHash,
+      outcome: "error",
+      ms: Date.now() - started,
+    });
     return null;
   }
 }

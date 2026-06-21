@@ -15,12 +15,17 @@ surrounding **Asana automation** — aligns with the **6 Layers of Agentic AI Go
 
 | Layer | Status | One-line summary |
 |---|---|---|
-| 1 · Discovery & Inventory | 🟡 Improving | Inventory now written down (see `ai-system-register.md`); previously code-only. |
-| 2 · Data Governance | 🟡 Partial | Source lineage + "honest verdicts" exist; no bias screening / retention policy. |
-| 3 · Security & Resilience | 🟡 Moderate | HMAC-signed audit, four-eyes, graceful fallback; no RBAC/auth or rate limiting. |
-| 4 · Model & Agent Assurance | 🔴 Minimal | Defensive parsing + tests; no eval set or drift monitoring of the LLM. |
-| 5 · Human Oversight | 🟢 Strong | Escalate/override, four-eyes, "detection automatic, applying changes reviewed". |
-| 6 · Governance, Compliance & Audit | 🟢 Good base | Tamper-evident audit, CI gates; no NIST/ISO/EU-AI-Act mapping yet. |
+| 1 · Discovery & Inventory | 🟢 | AI system register + framework mapping written; components inventoried. |
+| 2 · Data Governance | 🟢 | Source lineage + "honest verdicts" + a data retention & deletion policy. |
+| 3 · Security & Resilience | 🟢 | HMAC-signed audit, four-eyes, RBAC, rate limiting, incident playbook. |
+| 4 · Model & Agent Assurance | 🟢 | Output coercion + golden eval + red-team tests + LLM drift logging. |
+| 5 · Human Oversight | 🟢 | Escalate/override, four-eyes, **MLRO sign-off gate**, SLA escalation. |
+| 6 · Governance, Compliance & Audit | 🟢 | Tamper-evident audit + export, AI risk register, NIST/ISO/EU-AI-Act mapping. |
+
+> All six layers now have a documented control baseline. Remaining work is
+> **production hardening** (a real auth provider in place of header-based identity,
+> a durable monitoring sink, bias testing, and a legal sign-off on EU AI Act
+> classification) — tracked in [`six-layer-alignment.md`](./six-layer-alignment.md).
 
 ## What's the actual AI surface?
 
@@ -44,7 +49,11 @@ is mostly explainable and reproducible.
 |---|---|---|
 | [`ai-system-register.md`](./ai-system-register.md) | Inventory of every automated / AI decision component across the app **and** the Asana automation. | Layer 1 |
 | [`model-card-claude.md`](./model-card-claude.md) | Model card for the sole LLM (Claude enrichment): intended use, prompts, I/O, controls, limitations. | Layer 4 |
-| [`six-layer-alignment.md`](./six-layer-alignment.md) | Full 6-layer alignment assessment with file references and a prioritized remediation backlog. | All |
+| [`data-retention-policy.md`](./data-retention-policy.md) | Retention schedule, deletion, data minimisation, responsibilities. | Layer 2 |
+| [`ai-risk-register.md`](./ai-risk-register.md) | Scored risks, mitigating controls, residual risk, owners. | Layer 6 |
+| [`incident-response.md`](./incident-response.md) | Severity levels, roles, response steps, runbooks. | Layer 3 |
+| [`framework-mapping.md`](./framework-mapping.md) | Control mapping to NIST AI RMF, ISO/IEC 42001, EU AI Act. | Layer 6 |
+| [`six-layer-alignment.md`](./six-layer-alignment.md) | Full 6-layer alignment assessment with file references and remaining backlog. | All |
 
 ## Scope & disclaimer
 
