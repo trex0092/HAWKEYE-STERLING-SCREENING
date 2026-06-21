@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { liveEnabled } from "@/lib/integrations/config";
 import {
   screenName,
   matchIsPep,
@@ -335,15 +334,17 @@ export async function POST(req: Request) {
   // screened" against lists is still checked for negative press.
   const [base, adverse] = await Promise.all([
     (async (): Promise<Verdict> => {
-      if (liveEnabled("SANCTIONS_LIVE") && name) {
+      if (name) {
         try {
+          // screenName() screens against the free bundled index (no key) and,
+          // if none is present, an optionally-configured OpenSanctions/yente API.
           const live = await liveScreen(subject);
           if (live) return live;
         } catch {
           /* fall through to the honest "not screened" verdict */
         }
       }
-      // No live source: honest, non-fabricated "not screened" list verdict.
+      // No list source available: honest, non-fabricated "not screened" verdict.
       return cleanVerdict(name || "subject", subject, false);
     })(),
     fetchAdverse(name),
