@@ -137,11 +137,11 @@ container build is defined by the root `Dockerfile`.
 | `/api/quick-screen` | POST | Auto-screen a subject against free OpenSanctions (sanctions + PEP) → score, severity, reasoning, hits; deterministic mock offline |
 | `/api/adverse-media` | POST | Adverse-media verdict (risk tier, SAR flag) |
 | `/api/cases/nl-search` | POST | Resolve a natural-language query into matches |
-| `/api/screening/bulk-rescreen` | POST | Re-screen the portfolio |
+| `/api/screening/bulk-rescreen` | POST | Re-screen the portfolio (every subject gets a disposition: hit / cleared / unchanged) |
 | `/api/screening/resolve` | POST | Persist a hit resolution |
-| `/api/four-eyes` | POST | Escalation / four-eyes enqueue |
+| `/api/four-eyes` | POST | Four-eyes maker-checker review — rejects self-approval (maker ≠ checker enforced) |
 | `/api/ongoing` | POST | Ongoing-screening enrolment |
-| `/api/audit/sign` | POST | (Mock) HMAC audit-chain mirror |
+| `/api/audit/sign` | POST | Sign an audit payload (HMAC-SHA256); `PUT` verifies a payload+signature for tamper detection |
 | `/api/sanctions/operator-refresh` | POST | Kick off a sanctions refresh job |
 | `/api/sanctions/refresh-status/[jobId]` | GET | Poll refresh job status |
 | `/api/sanctions/last-errors` | GET | Last sanctions ingestion errors |
