@@ -6,6 +6,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Keyless sanctions + PEP screening from free bundled lists** — a build-time
+  step (`scripts/build-sanctions-index.mjs`) downloads the free, openly-licensed
+  OpenSanctions consolidated lists (OFAC, UN, EU, UK, Interpol) and PEP dataset
+  and compiles them into a compact, gzipped index that ships inside the deploy.
+  The screening route matches names against it **in-process at runtime — no API
+  key and no per-request network**, which works on serverless. Matching is
+  diacritic- and word-order-insensitive with a tunable threshold. The build is
+  resilient (writes an empty index and reports an honest "not screened" if the
+  data can't be fetched), and a remote yente/OpenSanctions API stays an optional
+  fallback (`SANCTIONS_LIVE` + `OPENSANCTIONS_API_URL`). CI builds stay fast and
+  hermetic via `SKIP_SANCTIONS_INDEX=1`.
+
 ### Changed
 
 - **Adverse media is now all live and worldwide** — the Google-News feed runs

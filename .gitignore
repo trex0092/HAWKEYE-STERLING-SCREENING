@@ -26,6 +26,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated at build time (free sanctions/PEP index)
+/src/lib/data/generated/
+
 # testing
 /coverage
 /playwright-report
