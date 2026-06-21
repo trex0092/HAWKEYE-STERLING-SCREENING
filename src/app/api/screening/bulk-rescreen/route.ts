@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { authorize } from "@/lib/auth/rbac";
 
 function hash(s: string): number {
   let h = 2166136261;
@@ -18,6 +19,11 @@ type Cleared = { subjectId: string; subjectName: string };
 type NoChange = { subjectId: string; subjectName: string };
 
 export async function POST(req: Request) {
+  const authz = authorize(req, "case.disposition");
+  if (!authz.ok) {
+    return NextResponse.json({ ok: false, error: authz.error }, { status: authz.status });
+  }
+
   const body = (await req.json().catch(() => ({}))) as BulkRescreenBody;
   const list = Array.isArray(body.subjects) ? body.subjects : [];
 

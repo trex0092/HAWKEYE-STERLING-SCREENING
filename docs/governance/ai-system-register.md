@@ -48,9 +48,11 @@ runs entirely on the deterministic logic below. Model id and behaviour: see
 | APP-CTL-6 | LLM drift log | Control | `src/lib/ai/llm-log.ts` | Capped record of each LLM call (prompt **hash**, model, outcome, latency) for drift review; no raw prompt/PII |
 | APP-CTL-7 | MLRO sign-off gate | Control | `src/app/api/mlro-signoff/route.ts` | A hard outcome (escalate/block) is not final without an MLRO + documented rationale; SoD enforced |
 | APP-CTL-8 | SLA escalation | Rules / Control | `src/app/api/sla-escalation/route.ts`, `src/lib/sla.ts` | Flags breached cases and routes them to L2 / MLRO deterministically |
-| APP-CTL-9 | RBAC | Control | `src/lib/auth/rbac.ts` | Role→permission matrix; privileged actions (sign-off, audit export) gated; `HAWKEYE_RBAC_STRICT` for prod posture |
-| APP-CTL-10 | Rate limiting | Control | `src/lib/auth/rate-limit.ts` | Fixed-window per-key ceiling (e.g. on `/api/explain`); returns 429 over limit |
+| APP-CTL-9 | RBAC | Control | `src/lib/auth/rbac.ts` | Role→permission matrix; applied to `audit/export`, `quick-screen`, `four-eyes`, `bulk-rescreen`, sign-off; `HAWKEYE_RBAC_STRICT` for prod posture |
+| APP-CTL-10 | Rate limiting | Control | `src/lib/auth/rate-limit.ts` | Fixed-window per-key ceiling on `/api/explain` and `/api/quick-screen`; returns 429 over limit |
 | APP-CTL-11 | Audit export + explainability | Control | `src/app/api/audit/export/route.ts`, `src/app/api/explain/route.ts` | RBAC-gated CSV export with SHA-256 checksum; deterministic per-subject score explanation |
+| APP-CTL-12 | Override capture | Control | `src/app/api/override/route.ts` | Records analyst overrides of the system verdict with a mandatory reason — the human-oversight feedback loop |
+| APP-CTL-13 | Retention enforcement | Rules / Control | `src/lib/retention.ts` | Pure keep/purge partition per the retention schedule; unparseable dates fail-safe to keep |
 
 ## D. Asana automation (external — `HAWKEYE-STERLING-RA` scheduled GitHub Actions)
 

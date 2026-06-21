@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { authorize } from "@/lib/auth/rbac";
 
 // ── Four-eyes (maker-checker) control ────────────────────────────────────────
 // Enforces the core dual-control rule: the person who made a decision (`maker`)
@@ -23,6 +24,11 @@ function norm(v: string | undefined): string {
 }
 
 export async function POST(req: Request) {
+  const authz = authorize(req, "case.disposition");
+  if (!authz.ok) {
+    return NextResponse.json({ ok: false, error: authz.error }, { status: authz.status });
+  }
+
   const body = (await req.json().catch(() => ({}))) as FourEyesBody;
 
   const caseId = norm(body.caseId);

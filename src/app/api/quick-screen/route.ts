@@ -7,6 +7,8 @@ import {
   type SanctionMatch,
 } from "@/lib/integrations/sanctions";
 import { fetchAdverseMedia } from "@/lib/integrations/adverse-media";
+import { authorize } from "@/lib/auth/rbac";
+import { rateLimit, rateLimitKey } from "@/lib/auth/rate-limit";
 
 // ── Subject auto-screen ──────────────────────────────────────────────────────
 // Free, no-key by default in production: name-matches the subject against the
@@ -325,6 +327,19 @@ function cleanVerdict(name: string, subject: SubjectPayload, live: boolean): Ver
 }
 
 export async function POST(req: Request) {
+  // Access control + abuse protection (offline-capable: anonymous → analyst).
+  const authz = authorize(req, "screen.run");
+  if (!authz.ok) {
+    return NextResponse.json({ ok: false, error: authz.error }, { status: authz.status });
+  }
+  const rl = rateLimit(rateLimitKey(req, "quick-screen"), 120, 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Rate limit exceeded; retry shortly." },
+      { status: 429, headers: { "retry-after": String(Math.ceil(rl.resetMs / 1000)) } },
+    );
+  }
+
   const body = (await req.json().catch(() => ({}))) as { subject?: SubjectPayload };
   const subject = body.subject ?? {};
   const name = (subject.name ?? "").trim();

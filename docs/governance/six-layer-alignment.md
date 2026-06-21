@@ -139,24 +139,25 @@ design of most automation keeps agentic risk low. Remaining work is **production
 
 | Area | Files |
 |---|---|
-| AI assurance | `src/lib/ai/coerce.ts`, `src/lib/ai/llm-log.ts` (+ wiring in `src/lib/ai/anthropic.ts`) |
-| Oversight | `src/app/api/mlro-signoff/route.ts`, `src/app/api/sla-escalation/route.ts`, `src/lib/sla.ts` |
-| Security | `src/lib/auth/rbac.ts`, `src/lib/auth/rate-limit.ts` |
+| AI assurance | `src/lib/ai/coerce.ts`, `src/lib/ai/llm-log.ts` (+ wiring in `src/lib/ai/anthropic.ts`); bias + golden eval tests |
+| Oversight | `src/app/api/mlro-signoff/route.ts`, `src/app/api/sla-escalation/route.ts`, `src/lib/sla.ts`, `src/app/api/override/route.ts` (override feedback loop) |
+| Security | `src/lib/auth/rbac.ts`, `src/lib/auth/rate-limit.ts`; RBAC + rate limiting applied to `quick-screen`, `four-eyes`, `bulk-rescreen` |
+| Data governance | `src/lib/retention.ts` (retention keep/purge enforcement) |
 | Audit / explainability | `src/app/api/audit/export/route.ts`, `src/app/api/explain/route.ts` |
-| Tests | `tests/unit/{llm-coerce,llm-log,llm-eval,sla,mlro-signoff,sla-escalation,rbac,rate-limit,audit-export,explain}.test.ts` |
+| Tests | `tests/unit/{llm-coerce,llm-log,llm-eval,llm-bias,sla,mlro-signoff,sla-escalation,rbac,rate-limit,audit-export,explain,override,retention}.test.ts` |
 | Docs | this folder: retention policy, risk register, incident response, framework mapping |
 
 ## Remaining backlog (production hardening)
 
-| Priority | Item | Layer |
-|---|---|---|
-| P1 | Real auth provider + session (replace header-based identity) | 3 |
-| P2 | Durable sink for the LLM drift log + audit trail | 2 / 4 |
-| P2 | Bias testing of adverse-media classification across languages | 2 |
-| P2 | Legal sign-off on EU AI Act classification | 6 |
-| P3 | Labelled ground-truth set for precision/recall + calibration | 4 |
-| P3 | Capture analyst overrides + reasons (feedback loop) | 5 |
-| P3 | Surface dataset version/freshness as live inventory | 1 / 2 |
+| Priority | Item | Layer | Why deferred |
+|---|---|---|---|
+| P1 | Real auth provider + session (replace header-based identity) | 3 | Needs an auth vendor/infra decision |
+| P1 | Wire the controls into the console UI (sign-off, export, explain, SLA) | 5 / 6 | Needs a real identity to avoid demo 403 friction (depends on the auth item above) |
+| P2 | Durable sink for the LLM drift log + audit trail | 2 / 4 | Needs a datastore beyond the app |
+| P2 | Legal sign-off on EU AI Act classification | 6 | Legal decision, not code |
+| P3 | Labelled ground-truth set for precision/recall + calibration | 4 | Needs labelled data + curation |
+| P3 | Surface dataset version/freshness as live inventory | 1 / 2 | Couples to the build/deploy artifact pipeline |
 
-> These remaining items need product/legal decisions or infrastructure beyond the app, so they
-> are tracked here rather than implemented in this pass.
+> Every item that is implementable purely in app code has been built. The remaining items each
+> need a product/legal decision or infrastructure beyond the app (an auth vendor, a datastore,
+> labelled data, or legal review), so they are tracked here rather than implemented.
