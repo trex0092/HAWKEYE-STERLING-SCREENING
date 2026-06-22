@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-// Exercise the LIVE path of fetchAdverseMedia (GDELT → Claude web search → Google
-// News RSS) with all network + the Anthropic SDK mocked, so the fallback ORDERING
-// is verified deterministically and offline.
+// Exercise the LIVE path of fetchAdverseMedia (Claude web search → GDELT → Google
+// News RSS) with all network + the Anthropic SDK mocked, so the lifetime-first
+// fallback ORDERING is verified deterministically and offline.
 
 const { create } = vi.hoisted(() => ({ create: vi.fn() }));
 vi.mock("@anthropic-ai/sdk", () => ({
@@ -28,7 +28,22 @@ function claudeReturns(json: string) {
   });
 }
 
-describe("fetchAdverseMedia — live fallback ordering", () => {
+const GDELT_ONE_HIT = {
+  ok: true,
+  status: 200,
+  data: {
+    articles: [
+      {
+        title: "Gold refinery hit by sanctions",
+        domain: "ft.com",
+        url: "https://ft.com/x",
+        seendate: "20260610T120000Z",
+      },
+    ],
+  },
+};
+
+describe("fetchAdverseMedia — lifetime-first fallback ordering", () => {
   beforeEach(() => {
     vi.resetModules();
     create.mockReset();
@@ -42,54 +57,52 @@ describe("fetchAdverseMedia — live fallback ordering", () => {
     delete process.env.ANTHROPIC_API_KEY;
   });
 
-  it("uses GDELT directly and consults neither Claude nor RSS when GDELT has hits", async () => {
+  it("uses Claude web search as the primary lifetime source; skips GDELT and RSS when it returns hits", async () => {
     process.env.ANTHROPIC_API_KEY = "test-key";
-    fetchJsonWithTimeout.mockResolvedValue({
-      ok: true,
-      status: 200,
-      data: {
-        articles: [
-          {
-            title: "Gold refinery hit by sanctions",
-            domain: "ft.com",
-            url: "https://ft.com/x",
-            seendate: "20260610T120000Z",
-          },
-        ],
-      },
-    });
-
-    const { fetchAdverseMedia } = await import("@/lib/integrations/adverse-media");
-    const { hits, live } = await fetchAdverseMedia("Istanbul Gold Refinery");
-
-    expect(live).toBe(true);
-    expect(hits[0]!.headline).toBe("Gold refinery hit by sanctions");
-    expect(hits[0]!.date).toBe("10 Jun 2026");
-    expect(create).not.toHaveBeenCalled();
-    expect(fetchTextWithTimeout).not.toHaveBeenCalled();
-  });
-
-  it("falls back to Claude web search when GDELT is empty (serverless-safe path)", async () => {
-    process.env.ANTHROPIC_API_KEY = "test-key";
-    fetchJsonWithTimeout.mockResolvedValue({ ok: true, status: 200, data: { articles: [] } });
     claudeReturns(
-      '{"hits":[{"headline":"Refinery named in laundering probe","source":"Reuters",' +
-        '"url":"https://example.com/1","date":"10 Jun 2026","sentiment":"negative","category":"Laundering"}]}',
+      '{"hits":[{"headline":"Refinery boss convicted in 2018 gold-laundering case","source":"Reuters",' +
+        '"url":"https://example.com/1","date":"12 Jan 2018","sentiment":"negative","category":"Laundering"}]}',
     );
 
     const { fetchAdverseMedia } = await import("@/lib/integrations/adverse-media");
-    const { hits, live } = await fetchAdverseMedia("Istanbul Gold Refinery");
+    const { hits, live } = await fetchAdverseMedia("Ozcan Halac");
 
     expect(live).toBe(true);
     expect(hits).toHaveLength(1);
-    expect(hits[0]!.headline).toBe("Refinery named in laundering probe");
-    expect(hits[0]!.sent).toBe("negative");
+    expect(hits[0]!.headline).toContain("2018");
     expect(create).toHaveBeenCalled();
-    // Claude answered, so the (IP-blocked-on-serverless) RSS scrape is never attempted.
+    expect(fetchJsonWithTimeout).not.toHaveBeenCalled(); // GDELT not consulted
+    expect(fetchTextWithTimeout).not.toHaveBeenCalled(); // RSS not consulted
+  });
+
+  it("falls back to GDELT when the lifetime search finds nothing", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    claudeReturns('{"hits":[]}');
+    fetchJsonWithTimeout.mockResolvedValue(GDELT_ONE_HIT);
+
+    const { fetchAdverseMedia } = await import("@/lib/integrations/adverse-media");
+    const { hits, live } = await fetchAdverseMedia("Ozcan Halac");
+
+    expect(live).toBe(true);
+    expect(hits[0]!.headline).toBe("Gold refinery hit by sanctions");
+    expect(create).toHaveBeenCalled();
     expect(fetchTextWithTimeout).not.toHaveBeenCalled();
   });
 
-  it("falls through to the Google-News scrape when no Anthropic key (research → null)", async () => {
+  it("returns a genuine empty result (no RSS) when both Claude and GDELT are empty", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    claudeReturns('{"hits":[]}');
+    fetchJsonWithTimeout.mockResolvedValue({ ok: true, status: 200, data: { articles: [] } });
+
+    const { fetchAdverseMedia } = await import("@/lib/integrations/adverse-media");
+    const { hits, live } = await fetchAdverseMedia("Nobody Clean");
+
+    expect(live).toBe(true);
+    expect(hits).toHaveLength(0);
+    expect(fetchTextWithTimeout).not.toHaveBeenCalled(); // RSS skipped on a keyed deploy
+  });
+
+  it("falls through to the Google-News scrape when no Anthropic key (dev/local)", async () => {
     delete process.env.ANTHROPIC_API_KEY;
     fetchJsonWithTimeout.mockResolvedValue({ ok: true, status: 200, data: { articles: [] } });
     fetchTextWithTimeout.mockResolvedValue({
@@ -99,7 +112,7 @@ describe("fetchAdverseMedia — live fallback ordering", () => {
     });
 
     const { fetchAdverseMedia } = await import("@/lib/integrations/adverse-media");
-    const { hits, live } = await fetchAdverseMedia("Istanbul Gold Refinery");
+    const { hits, live } = await fetchAdverseMedia("Ozcan Halac");
 
     expect(live).toBe(true);
     expect(create).not.toHaveBeenCalled();
