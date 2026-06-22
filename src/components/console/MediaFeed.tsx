@@ -4,18 +4,34 @@ import type { MediaHit } from "@/lib/data/console-datasets";
 import { sentInfo } from "@/lib/console/derive";
 import { EmptyState } from "./EmptyState";
 
-export function MediaFeed({ hits }: { hits: MediaHit[] }) {
+export function MediaFeed({ hits, subject }: { hits: MediaHit[]; subject?: string }) {
   if (hits.length === 0) {
     return (
       <EmptyState
         title="No adverse-media hits"
-        hint="Negative-news results appear here once a subject is screened."
+        hint={
+          subject
+            ? `No negative news found for ${subject}.`
+            : "Negative-news results appear here once a subject is screened."
+        }
         icon="📰"
       />
     );
   }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {subject && (
+        <div
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "#828DA4",
+          }}
+        >
+          Adverse media · <span style={{ color: "#E3E7EF" }}>{subject}</span>
+        </div>
+      )}
       {hits.map((m, i) => {
         const tone = sentInfo(m.sent);
         return (

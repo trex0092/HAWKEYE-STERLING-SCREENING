@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type {
   Subject,
@@ -64,6 +64,7 @@ interface QuickScreenResult {
   lists?: string[];
   topScore?: number;
   reasoning?: { decision?: "clear" | "review" | "escalate" | "block" };
+  hits?: { candidateName: string; listId: string; score: number; programs?: string[] }[];
   adverseMedia?: {
     live: boolean;
     negativeCount: number;
@@ -169,6 +170,8 @@ export default function ScreeningConsole() {
   const [sources, setSources] = useState<SanctionSourceRow[] | null>(null);
   const [sourcesLive, setSourcesLive] = useState(false);
   const [media, setMedia] = useState<MediaHit[] | null>(null);
+  const [subjectMedia, setSubjectMedia] = useState<MediaHit[]>([]);
+  const mediaCache = useRef<Map<string, MediaHit[]>>(new Map());
   const [realAudit, setRealAudit] = useState<AuditRow[]>([]);
   const [syncing, setSyncing] = useState(false);
 
@@ -259,6 +262,36 @@ export default function ScreeningConsole() {
     window.addEventListener("hawkeye:audit-updated", load);
     return () => window.removeEventListener("hawkeye:audit-updated", load);
   }, []);
+
+  // Fetch the selected subject's adverse media (cached per subject name) so the
+  // Adverse Media tab + subject panel show that subject's real coverage.
+  useEffect(() => {
+    const subj = subjects.find((s) => s.id === selectedId);
+    if (!subj) {
+      setSubjectMedia([]);
+      return;
+    }
+    const name = subj.name;
+    const cached = mediaCache.current.get(name);
+    if (cached) {
+      setSubjectMedia(cached);
+      return;
+    }
+    let alive = true;
+    void (async () => {
+      const r = await fetchJson<{ hits: MediaHit[]; live: boolean }>(
+        `/api/adverse-media/news?subject=${encodeURIComponent(name)}`,
+        { label: "adverse-media/news" },
+      );
+      if (alive && r.ok && r.data) {
+        mediaCache.current.set(name, r.data.hits);
+        setSubjectMedia(r.data.hits);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [selectedId, subjects]);
 
   const meta = META[module];
   const selected = subjects.find((s) => s.id === selectedId) ?? subjects[0];
@@ -394,6 +427,16 @@ export default function ScreeningConsole() {
                 ...(v.live && v.pep
                   ? { pep: { tier: "Match", rationale: "OpenSanctions PEP record" } }
                   : {}),
+                ...(v.hits && v.hits.length
+                  ? {
+                      screeningHits: v.hits.map((h) => ({
+                        name: h.candidateName,
+                        list: h.listId.toUpperCase(),
+                        score: h.score,
+                        ...(h.programs && h.programs.length ? { programs: h.programs } : {}),
+                      })),
+                    }
+                  : {}),
               }
             : s,
         ),
@@ -503,7 +546,12 @@ export default function ScreeningConsole() {
             )}
             {module === "cases" && <CasesTable subjects={subjects} onOpen={openCase} />}
             {module === "sanctions" && <SanctionsGrid sources={sources ?? []} />}
-            {module === "media" && <MediaFeed hits={media ?? []} />}
+            {module === "media" && (
+              <MediaFeed
+                hits={selected ? subjectMedia : (media ?? [])}
+                subject={selected ? selected.name : undefined}
+              />
+            )}
             {module === "crypto" && <CryptoTable wallets={WALLETS} />}
             {module === "vessels" && <VesselsTable vessels={VESSELS} />}
             {module === "audit" && <AuditTimeline rows={auditRows} />}
@@ -541,6 +589,8 @@ export default function ScreeningConsole() {
               <SubjectDetail
                 subject={selected}
                 related={related}
+                adverseMediaHeadlines={subjectMedia}
+                screeningHits={selected.screeningHits}
                 onReassign={(id) => patchSelected({ analyst: id }, "Reassigned analyst")}
                 onStatus={(s: SubjectStatus) => patchSelected({ status: s }, `Status → ${s}`)}
                 onCdd={(c: CDDPosture) => patchSelected({ cddPosture: c }, `CDD posture → ${c}`)}

@@ -11,7 +11,7 @@
 
 import { fetchTextWithTimeout } from "@/lib/integrations/http";
 import { liveEnabled } from "@/lib/integrations/config";
-import { classifyAdverseMedia } from "@/lib/ai/anthropic";
+import { classifyAdverseMedia, researchAdverseMedia } from "@/lib/ai/anthropic";
 import { MEDIA, type MediaHit } from "@/lib/data/console-datasets";
 
 function decodeEntities(s: string): string {
@@ -135,6 +135,15 @@ export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaRe
   // Offline only (the deterministic unit-test runner): seed fixtures. Live
   // deployments NEVER serve seed/mock news — the feed is all live.
   if (!live) return { hits: seedFeed(subject), live: false };
+
+  // Primary live source: Claude's server-side web search. It runs on Anthropic's
+  // infrastructure, so it returns real coverage even where direct news-site
+  // scraping is blocked (e.g. serverless deploys). Falls through to the
+  // Google-News scrape only when the model is unavailable (no key / error).
+  if (subject) {
+    const researched = await researchAdverseMedia(subject);
+    if (researched !== null) return { hits: researched, live: true };
+  }
 
   const query = subject
     ? `${subject} (sanction OR fraud OR laundering OR investigation OR bribery OR corruption OR arrest OR indictment)`

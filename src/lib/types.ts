@@ -89,6 +89,8 @@ export interface Subject {
   notes?: string;
   riskCategory?: string;
   adverseMedia?: AdverseMediaInfo;
+  /** Console: top sanctions/PEP match records from quick-screen (for display). */
+  screeningHits?: { name: string; list: string; score: number; programs?: string[] }[];
   walletAddresses?: string[];
   vesselImo?: string;
   vesselMmsi?: string;

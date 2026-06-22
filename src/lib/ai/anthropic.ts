@@ -15,6 +15,7 @@ import {
 } from "./coerce";
 import { hashText, recordLlmCall } from "./llm-log";
 import { detectThreats } from "../threat";
+import type { MediaHit } from "@/lib/data/console-datasets";
 
 /**
  * Scan untrusted input headed for the model for prompt-injection / jailbreak
@@ -150,6 +151,90 @@ export async function screeningReasoning(
       outcome: "error",
       ms: Date.now() - started,
     });
+    return null;
+  }
+}
+
+/** Concatenate every text block of a Claude response (skips refusals). */
+function allText(res: Anthropic.Message): string {
+  if ((res.stop_reason as string) === "refusal") return "";
+  return res.content.map((b) => (b.type === "text" ? b.text : "")).join("\n");
+}
+
+/** Validate raw model JSON into MediaHit[]; silently drops malformed entries. */
+function coerceMediaHits(subject: string, raw: unknown): MediaHit[] {
+  if (!Array.isArray(raw)) return [];
+  const out: MediaHit[] = [];
+  for (const r of raw.slice(0, 12)) {
+    if (!r || typeof r !== "object") continue;
+    const o = r as Record<string, unknown>;
+    const headline = typeof o.headline === "string" ? o.headline.trim() : "";
+    if (!headline) continue;
+    const sent =
+      o.sentiment === "positive" ? "positive" : o.sentiment === "neutral" ? "neutral" : "negative";
+    const url = typeof o.url === "string" && /^https?:\/\//.test(o.url) ? o.url : undefined;
+    out.push({
+      subject,
+      cat:
+        typeof o.category === "string" && o.category.trim()
+          ? o.category.trim().slice(0, 40)
+          : "News",
+      source: typeof o.source === "string" && o.source.trim() ? o.source.trim() : "Web",
+      date: typeof o.date === "string" ? o.date.trim() : "",
+      sent,
+      headline: headline.slice(0, 300),
+      ...(url ? { url } : {}),
+    });
+  }
+  return out;
+}
+
+/**
+ * Research real adverse media for a subject using Claude's server-side web
+ * search tool. Returns genuine, structured MediaHit[] (an empty array means
+ * "searched, found nothing"), or null when the client is unavailable / the call
+ * fails so callers can fall back to the Google-News feed. The search runs on
+ * Anthropic's infrastructure, so it works where direct news-site scraping is
+ * blocked (e.g. serverless deploys). Never fabricates — instructed to return no
+ * hits rather than invent coverage.
+ */
+export async function researchAdverseMedia(subject: string): Promise<MediaHit[] | null> {
+  const name = subject.trim();
+  if (!name) return [];
+  const client = getAnthropic();
+  if (!client) return null;
+  const started = Date.now();
+  const promptHash = hashText(`adverse-media:${name}`);
+  recordThreatScan("researchAdverseMedia", MODEL, promptHash, name);
+  const tools = [
+    { type: "web_search_20260209" as const, name: "web_search" as const, max_uses: 5 },
+  ];
+  const system =
+    "You are a financial-crime adverse-media analyst. Use web search to find RECENT, REAL " +
+    "negative news about the named subject: sanctions, fraud, money laundering, corruption, " +
+    "bribery, investigations, arrests, indictments, or regulatory action. Return ONLY compact " +
+    'JSON: {"hits":[{"headline":"","source":"","url":"","date":"DD Mon YYYY",' +
+    '"sentiment":"negative|neutral|positive","category":"<2-3 words>"}]} with up to 12 of the ' +
+    "most relevant items, most recent first. Use ONLY facts from the search results — never " +
+    'invent articles, sources, or URLs. If nothing about THIS subject is found, return {"hits":[]}.';
+  try {
+    let messages: Anthropic.MessageParam[] = [{ role: "user", content: name }];
+    let res = await client.messages.create({ model: MODEL, max_tokens: 2000, system, tools, messages });
+    // Server-tool loop: the model pauses while it runs searches.
+    for (let i = 0; i < 3 && (res.stop_reason as string) === "pause_turn"; i++) {
+      messages = [...messages, { role: "assistant", content: res.content }];
+      res = await client.messages.create({ model: MODEL, max_tokens: 2000, system, tools, messages });
+    }
+    const parsed = safeJson<{ hits?: unknown }>(allText(res));
+    if (!parsed || !Array.isArray(parsed.hits)) {
+      recordLlmCall({ task: "researchAdverseMedia", model: MODEL, promptHash, outcome: "rejected", ms: Date.now() - started });
+      return null;
+    }
+    const hits = coerceMediaHits(name, parsed.hits);
+    recordLlmCall({ task: "researchAdverseMedia", model: MODEL, promptHash, outcome: "ok", ms: Date.now() - started });
+    return hits;
+  } catch {
+    recordLlmCall({ task: "researchAdverseMedia", model: MODEL, promptHash, outcome: "error", ms: Date.now() - started });
     return null;
   }
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import type { Subject, SubjectStatus, CDDPosture } from "@/lib/types";
+import type { MediaHit } from "@/lib/data/console-datasets";
 import { OPERATORS } from "@/lib/data/operators";
-import { cddTone, listChip, riskColor, slaColor, statusTone } from "@/lib/console/derive";
+import { cddTone, listChip, riskColor, sentInfo, slaColor, statusTone } from "@/lib/console/derive";
 
 const STATUS_OPTS: SubjectStatus[] = ["active", "review", "escalated", "cleared"];
 const CDD_OPTS: CDDPosture[] = ["SDD", "CDD", "EDD"];
@@ -36,9 +37,13 @@ export function SubjectDetail({
   onClear,
   onNotes,
   onSelectRelated,
+  adverseMediaHeadlines,
+  screeningHits,
 }: {
   subject: Subject;
   related: Subject[];
+  adverseMediaHeadlines?: MediaHit[];
+  screeningHits?: { name: string; list: string; score: number; programs?: string[] }[];
   onReassign: (analystId: string) => void;
   onStatus: (s: SubjectStatus) => void;
   onCdd: (c: CDDPosture) => void;
@@ -393,6 +398,102 @@ export function SubjectDetail({
           })}
         </div>
       </div>
+
+      {screeningHits && screeningHits.length > 0 && (
+        <div style={sectionTop}>
+          <div style={{ ...labelCap, marginBottom: 8 }}>Sanctions / PEP matches</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            {screeningHits.map((h, i) => {
+              const c = listChip(h.list);
+              return (
+                <div key={`${h.name}-${i}`} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span
+                    style={{
+                      fontSize: 9.5,
+                      letterSpacing: "0.06em",
+                      color: c.c,
+                      background: c.bg,
+                      border: `1px solid ${c.bd}`,
+                      borderRadius: 5,
+                      padding: "2px 7px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {c.t}
+                  </span>
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      fontSize: 12.5,
+                      color: "#DCE1EC",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {h.name}
+                  </span>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: riskColor(h.score), flexShrink: 0 }}>
+                    {h.score}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {adverseMediaHeadlines && adverseMediaHeadlines.length > 0 && (
+        <div style={sectionTop}>
+          <div style={{ ...labelCap, marginBottom: 8 }}>Adverse Media</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {adverseMediaHeadlines.slice(0, 6).map((h, i) => {
+              const tone = sentInfo(h.sent);
+              const srcLine = `${h.source}${h.date ? ` · ${h.date}` : ""}`;
+              return (
+                <div
+                  key={`${h.headline}-${i}`}
+                  style={{
+                    display: "flex",
+                    gap: 9,
+                    paddingBottom: 8,
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <span style={{ width: 3, borderRadius: 99, background: tone.c, flex: "none" }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {h.url ? (
+                      <a
+                        href={h.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ textDecoration: "none", color: "inherit" }}
+                      >
+                        <div style={{ fontSize: 12.5, fontWeight: 700, color: "#E3E7EF", lineHeight: 1.4 }}>
+                          {h.headline}
+                        </div>
+                        <div style={{ fontSize: 11, color: "#828DA4", marginTop: 2, letterSpacing: "0.02em" }}>
+                          {srcLine}
+                        </div>
+                      </a>
+                    ) : (
+                      <>
+                        <div style={{ fontSize: 12.5, fontWeight: 700, color: "#E3E7EF", lineHeight: 1.4 }}>
+                          {h.headline}
+                        </div>
+                        <div style={{ fontSize: 11, color: "#828DA4", marginTop: 2, letterSpacing: "0.02em" }}>
+                          {srcLine}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div>
         <div style={{ ...labelCap, marginBottom: 6 }}>Notes</div>
