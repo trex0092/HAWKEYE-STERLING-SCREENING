@@ -406,7 +406,10 @@ export function SubjectDetail({
             {screeningHits.map((h, i) => {
               const c = listChip(h.list);
               return (
-                <div key={`${h.name}-${i}`} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div
+                  key={`${h.name}-${i}`}
+                  style={{ display: "flex", alignItems: "center", gap: 8 }}
+                >
                   <span
                     style={{
                       fontSize: 9.5,
@@ -434,7 +437,14 @@ export function SubjectDetail({
                   >
                     {h.name}
                   </span>
-                  <span style={{ fontWeight: 700, fontSize: 13, color: riskColor(h.score), flexShrink: 0 }}>
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      fontSize: 13,
+                      color: riskColor(h.score),
+                      flexShrink: 0,
+                    }}
+                  >
                     {h.score}
                   </span>
                 </div>
@@ -470,19 +480,47 @@ export function SubjectDetail({
                         rel="noreferrer"
                         style={{ textDecoration: "none", color: "inherit" }}
                       >
-                        <div style={{ fontSize: 12.5, fontWeight: 700, color: "#E3E7EF", lineHeight: 1.4 }}>
+                        <div
+                          style={{
+                            fontSize: 12.5,
+                            fontWeight: 700,
+                            color: "#E3E7EF",
+                            lineHeight: 1.4,
+                          }}
+                        >
                           {h.headline}
                         </div>
-                        <div style={{ fontSize: 11, color: "#828DA4", marginTop: 2, letterSpacing: "0.02em" }}>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#828DA4",
+                            marginTop: 2,
+                            letterSpacing: "0.02em",
+                          }}
+                        >
                           {srcLine}
                         </div>
                       </a>
                     ) : (
                       <>
-                        <div style={{ fontSize: 12.5, fontWeight: 700, color: "#E3E7EF", lineHeight: 1.4 }}>
+                        <div
+                          style={{
+                            fontSize: 12.5,
+                            fontWeight: 700,
+                            color: "#E3E7EF",
+                            lineHeight: 1.4,
+                          }}
+                        >
                           {h.headline}
                         </div>
-                        <div style={{ fontSize: 11, color: "#828DA4", marginTop: 2, letterSpacing: "0.02em" }}>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#828DA4",
+                            marginTop: 2,
+                            letterSpacing: "0.02em",
+                          }}
+                        >
                           {srcLine}
                         </div>
                       </>

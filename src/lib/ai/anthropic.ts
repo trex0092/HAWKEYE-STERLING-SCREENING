@@ -219,22 +219,52 @@ export async function researchAdverseMedia(subject: string): Promise<MediaHit[] 
     'invent articles, sources, or URLs. If nothing about THIS subject is found, return {"hits":[]}.';
   try {
     let messages: Anthropic.MessageParam[] = [{ role: "user", content: name }];
-    let res = await client.messages.create({ model: MODEL, max_tokens: 2000, system, tools, messages });
+    let res = await client.messages.create({
+      model: MODEL,
+      max_tokens: 2000,
+      system,
+      tools,
+      messages,
+    });
     // Server-tool loop: the model pauses while it runs searches.
     for (let i = 0; i < 3 && (res.stop_reason as string) === "pause_turn"; i++) {
       messages = [...messages, { role: "assistant", content: res.content }];
-      res = await client.messages.create({ model: MODEL, max_tokens: 2000, system, tools, messages });
+      res = await client.messages.create({
+        model: MODEL,
+        max_tokens: 2000,
+        system,
+        tools,
+        messages,
+      });
     }
     const parsed = safeJson<{ hits?: unknown }>(allText(res));
     if (!parsed || !Array.isArray(parsed.hits)) {
-      recordLlmCall({ task: "researchAdverseMedia", model: MODEL, promptHash, outcome: "rejected", ms: Date.now() - started });
+      recordLlmCall({
+        task: "researchAdverseMedia",
+        model: MODEL,
+        promptHash,
+        outcome: "rejected",
+        ms: Date.now() - started,
+      });
       return null;
     }
     const hits = coerceMediaHits(name, parsed.hits);
-    recordLlmCall({ task: "researchAdverseMedia", model: MODEL, promptHash, outcome: "ok", ms: Date.now() - started });
+    recordLlmCall({
+      task: "researchAdverseMedia",
+      model: MODEL,
+      promptHash,
+      outcome: "ok",
+      ms: Date.now() - started,
+    });
     return hits;
   } catch {
-    recordLlmCall({ task: "researchAdverseMedia", model: MODEL, promptHash, outcome: "error", ms: Date.now() - started });
+    recordLlmCall({
+      task: "researchAdverseMedia",
+      model: MODEL,
+      promptHash,
+      outcome: "error",
+      ms: Date.now() - started,
+    });
     return null;
   }
 }
