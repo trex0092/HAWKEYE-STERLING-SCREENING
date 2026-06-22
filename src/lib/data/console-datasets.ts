@@ -21,50 +21,10 @@ export interface SanctionSourceRow {
   status: "current" | "stale";
 }
 
-export const SOURCES: SanctionSourceRow[] = [
-  {
-    name: "OFAC SDN & Consolidated",
-    code: "OFAC",
-    entries: "12,438",
-    updated: "18 Jun · 04:00",
-    status: "current",
-  },
-  {
-    name: "UN Security Council Consolidated",
-    code: "UN",
-    entries: "1,067",
-    updated: "17 Jun · 22:10",
-    status: "current",
-  },
-  {
-    name: "EU Consolidated Financial Sanctions",
-    code: "EU",
-    entries: "3,512",
-    updated: "18 Jun · 02:30",
-    status: "current",
-  },
-  {
-    name: "UK OFSI Consolidated",
-    code: "UK",
-    entries: "4,201",
-    updated: "18 Jun · 03:15",
-    status: "current",
-  },
-  {
-    name: "INTERPOL Notices",
-    code: "INTERPOL",
-    entries: "8,940",
-    updated: "16 Jun · 19:45",
-    status: "stale",
-  },
-  {
-    name: "EOCN Watchlist",
-    code: "EOCN",
-    entries: "612",
-    updated: "18 Jun · 01:05",
-    status: "current",
-  },
-];
+// Watchlist sources ship empty. When SANCTIONS_LIVE is enabled the engine
+// overlays live OpenSanctions metadata onto these rows — with no seed rows the
+// Sanctions module renders empty until a source is connected.
+export const SOURCES: SanctionSourceRow[] = [];
 
 export interface MediaHit {
   subject: string;
@@ -76,56 +36,9 @@ export interface MediaHit {
   url?: string;
 }
 
-export const MEDIA: MediaHit[] = [
-  {
-    subject: "Boris Volkov",
-    cat: "Sanctions",
-    source: "Reuters",
-    date: "14 Jun 2026",
-    sent: "negative",
-    headline: "Asset-freeze designation expanded under EO 14024",
-  },
-  {
-    subject: "Helena Vance",
-    cat: "Litigation",
-    source: "Financial Times",
-    date: "12 Jun 2026",
-    sent: "negative",
-    headline: "Civil fraud suit filed against UK director in High Court",
-  },
-  {
-    subject: "Zenith Trading FZE",
-    cat: "Trade fraud",
-    source: "OCCRP",
-    date: "11 Jun 2026",
-    sent: "negative",
-    headline: "Free-zone shell linked to over-invoicing network",
-  },
-  {
-    subject: "Cipher Node Exchange",
-    cat: "Crypto",
-    source: "CoinDesk",
-    date: "10 Jun 2026",
-    sent: "negative",
-    headline: "Exchange flagged for mixer-adjacent settlement flows",
-  },
-  {
-    subject: "Gamal Mubarak",
-    cat: "PEP",
-    source: "Associated Press",
-    date: "09 Jun 2026",
-    sent: "neutral",
-    headline: "Family wealth under renewed regulatory scrutiny",
-  },
-  {
-    subject: "MV Nordic Star",
-    cat: "Sanctions",
-    source: "Lloyd's List",
-    date: "10 Jun 2026",
-    sent: "negative",
-    headline: "Vessel detained over dual-use cargo manifest",
-  },
-];
+// Adverse-media hits ship empty. Live deployments pull real Google-News results
+// per screened subject; the deterministic offline runner returns this seed.
+export const MEDIA: MediaHit[] = [];
 
 export interface WalletRow {
   label: string;
@@ -136,48 +49,8 @@ export interface WalletRow {
   flag: string;
 }
 
-export const WALLETS: WalletRow[] = [
-  {
-    label: "Cipher Node Exchange — hot",
-    chain: "ETH",
-    addr: "0x9f2a…c41b",
-    exposure: "1,750,000",
-    risk: 65,
-    flag: "Mixer adjacency",
-  },
-  {
-    label: "Unhosted — counterparty",
-    chain: "BTC",
-    addr: "bc1q…7h2k",
-    exposure: "420,000",
-    risk: 48,
-    flag: "Unhosted",
-  },
-  {
-    label: "Zenith treasury",
-    chain: "TRON",
-    addr: "TJ9k…Lp3v",
-    exposure: "2,100,000",
-    risk: 60,
-    flag: "High-risk VASP",
-  },
-  {
-    label: "Bridge relay",
-    chain: "ETH",
-    addr: "0x41d8…9aa2",
-    exposure: "880,000",
-    risk: 38,
-    flag: "Cross-chain",
-  },
-  {
-    label: "OTC desk",
-    chain: "USDT",
-    addr: "0x7c0e…b15f",
-    exposure: "310,000",
-    risk: 22,
-    flag: "—",
-  },
-];
+// Monitored wallets ship empty — added at runtime as crypto entities are tracked.
+export const WALLETS: WalletRow[] = [];
 
 export interface VesselRow {
   name: string;
@@ -190,58 +63,8 @@ export interface VesselRow {
   lists: string[];
 }
 
-export const VESSELS: VesselRow[] = [
-  {
-    name: "MV Nordic Star",
-    imo: "9483210",
-    flag: "PANAMA",
-    type: "Bulk carrier",
-    status: "Detained",
-    lastPort: "Novorossiysk",
-    risk: 88,
-    lists: ["UN", "EU"],
-  },
-  {
-    name: "MT Caspian Pearl",
-    imo: "9551203",
-    flag: "LIBERIA",
-    type: "Tanker",
-    status: "Underway",
-    lastPort: "Fujairah",
-    risk: 64,
-    lists: ["OFAC"],
-  },
-  {
-    name: "MV Aegean Trader",
-    imo: "9402118",
-    flag: "MALTA",
-    type: "Cargo",
-    status: "Anchored",
-    lastPort: "Piraeus",
-    risk: 35,
-    lists: [],
-  },
-  {
-    name: "MT Gulf Horizon",
-    imo: "9620045",
-    flag: "UAE",
-    type: "Tanker",
-    status: "Underway",
-    lastPort: "Jebel Ali",
-    risk: 52,
-    lists: ["EU"],
-  },
-  {
-    name: "MV Baltic Crown",
-    imo: "9388471",
-    flag: "CYPRUS",
-    type: "Container",
-    status: "In port",
-    lastPort: "Limassol",
-    risk: 20,
-    lists: [],
-  },
-];
+// Tracked vessels ship empty — added at runtime as maritime entities are flagged.
+export const VESSELS: VesselRow[] = [];
 
 export interface AuditRow {
   t: string;
@@ -251,78 +74,9 @@ export interface AuditRow {
   c: string;
 }
 
-export const AUDIT: AuditRow[] = [
-  {
-    t: "13:08:42",
-    actor: "Sentinel",
-    action: "Escalated subject",
-    target: "HS-10001 · Boris Volkov",
-    c: "#FF6B6B",
-  },
-  {
-    t: "12:54:10",
-    actor: "Operator OP",
-    action: "Opened case",
-    target: "CS-10002 · MV Nordic Star",
-    c: "#7FB3E8",
-  },
-  {
-    t: "12:31:05",
-    actor: "Talon",
-    action: "Flagged vessel",
-    target: "MV Nordic Star · IMO 9483210",
-    c: "#FFAE57",
-  },
-  {
-    t: "11:47:33",
-    actor: "System",
-    action: "List sync — OFAC SDN",
-    target: "+12 entries · 04:00",
-    c: "#4FD6A0",
-  },
-  {
-    t: "11:20:58",
-    actor: "Ember",
-    action: "Adverse-media hit",
-    target: "HS-10009 · Helena Vance",
-    c: "#FFAE57",
-  },
-  {
-    t: "10:58:14",
-    actor: "Cypher",
-    action: "Crypto exposure review",
-    target: "Cipher Node Exchange",
-    c: "#7FB3E8",
-  },
-  {
-    t: "10:33:02",
-    actor: "Operator OP",
-    action: "Marked cleared",
-    target: "HS-10007 · Lukas Brenner",
-    c: "#4FD6A0",
-  },
-  {
-    t: "09:51:47",
-    actor: "Cobalt",
-    action: "CDD posture → EDD",
-    target: "HS-10005 · Zenith Trading FZE",
-    c: "#FF9F45",
-  },
-  {
-    t: "09:12:20",
-    actor: "System",
-    action: "List sync — EU Consolidated",
-    target: "+4 entries · 02:30",
-    c: "#4FD6A0",
-  },
-  {
-    t: "08:40:05",
-    actor: "Lattice",
-    action: "UBO structure mapped",
-    target: "HS-10012 · Crescent Holdings",
-    c: "#7FB3E8",
-  },
-];
+// The audit timeline ships empty — every entry is a real action written at
+// runtime via writeAuditEvent() (persisted to localStorage), not seeded.
+export const AUDIT: AuditRow[] = [];
 
 // ── Intake modal option lists ────────────────────────────────────────────────
 

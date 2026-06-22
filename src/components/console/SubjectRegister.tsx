@@ -306,6 +306,18 @@ export function SubjectRegister({
           <span>SLA</span>
           <span>Lists</span>
         </div>
+        {rows.length === 0 && (
+          <div style={{ padding: "40px 16px", textAlign: "center" }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: "#A3ADC0", marginBottom: 4 }}>
+              {subjects.length === 0 ? "No subjects yet" : "No matches"}
+            </div>
+            <div style={{ fontSize: 12, color: "#646F86" }}>
+              {subjects.length === 0
+                ? "Add a subject with + New to begin screening."
+                : "Try a different search."}
+            </div>
+          </div>
+        )}
         {rows.map((s) => {
           const sel = s.id === selectedId;
           const st = statusTone(s.status);

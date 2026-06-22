@@ -74,6 +74,11 @@ export function SubjectDetail({
           Reassign Analyst
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+          {OPERATORS.length === 0 && (
+            <span style={{ fontSize: 12, color: "#646F86", letterSpacing: "0.03em" }}>
+              No analysts configured.
+            </span>
+          )}
           {OPERATORS.map((o) => {
             const on = subject.analyst === o.id;
             return (

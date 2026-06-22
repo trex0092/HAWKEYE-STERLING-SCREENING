@@ -1,8 +1,18 @@
 "use client";
 
 import type { AuditRow } from "@/lib/data/console-datasets";
+import { EmptyState } from "./EmptyState";
 
 export function AuditTimeline({ rows }: { rows: AuditRow[] }) {
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        title="No activity yet"
+        hint="Analyst actions and list syncs are logged here as they happen."
+        icon="◷"
+      />
+    );
+  }
   return (
     <div
       style={{

@@ -3,6 +3,7 @@
 import type { Subject } from "@/lib/types";
 import { operatorById } from "@/lib/data/operators";
 import { riskColor, slaColor, stageInfo } from "@/lib/console/derive";
+import { EmptyState } from "./EmptyState";
 
 const COLS = "84px minmax(150px,1.4fr) 134px 120px 64px 80px";
 
@@ -16,6 +17,16 @@ export function CasesTable({
   const rows = subjects
     .filter((s) => s.status === "escalated" || s.status === "review")
     .sort((a, b) => b.riskScore - a.riskScore);
+
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        title="No open cases"
+        hint="Cases open automatically when a subject is escalated or moved to review."
+        icon="⚖"
+      />
+    );
+  }
 
   return (
     <div
@@ -111,7 +122,7 @@ export function CasesTable({
               </span>
             </div>
             <span style={{ fontSize: 13, color: "#C9D2E2", letterSpacing: "0.02em" }}>
-              {operatorById(s.analyst).name}
+              {operatorById(s.analyst)?.name ?? "Unassigned"}
             </span>
             <span style={{ fontWeight: 700, fontSize: 16, color: riskColor(s.riskScore) }}>
               {s.riskScore}

@@ -2,8 +2,18 @@
 
 import type { MediaHit } from "@/lib/data/console-datasets";
 import { sentInfo } from "@/lib/console/derive";
+import { EmptyState } from "./EmptyState";
 
 export function MediaFeed({ hits }: { hits: MediaHit[] }) {
+  if (hits.length === 0) {
+    return (
+      <EmptyState
+        title="No adverse-media hits"
+        hint="Negative-news results appear here once a subject is screened."
+        icon="📰"
+      />
+    );
+  }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {hits.map((m, i) => {

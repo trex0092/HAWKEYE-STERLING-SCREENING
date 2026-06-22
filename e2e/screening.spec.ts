@@ -6,21 +6,17 @@ test("root redirects to /screening and renders the console", async ({ page }) =>
   await expect(page.getByText("HAWKEYE STERLING")).toBeVisible();
 });
 
-test("the subject register lists seed subjects and shows the analyst HUD", async ({ page }) => {
+test("the subject register ships empty with a standby HUD", async ({ page }) => {
   await page.goto("/screening");
-  // Use subjects that aren't selected by default (Boris Volkov) and aren't in
-  // the RU "related subjects" list, so each name appears exactly once.
-  await expect(page.getByText("Helena Vance")).toBeVisible();
-  await expect(page.getByText("Amira Hassan")).toBeVisible();
-  // The HUD fronts the selected subject's analyst (Boris Volkov → Ember).
-  await expect(page.getByText("Ember")).toBeVisible();
+  await expect(page.getByText("No subjects yet")).toBeVisible();
+  // The HUD shows a neutral standby state when no analyst is assigned.
+  await expect(page.getByText("No analyst assigned")).toBeVisible();
 });
 
-test("switching modules swaps the centre content", async ({ page }) => {
+test("switching modules swaps the centre content (all empty)", async ({ page }) => {
   await page.goto("/screening");
   await page.getByRole("link", { name: "Cases" }).click();
-  // A case-row id only the Cases table renders (Boris Volkov is escalated).
-  await expect(page.getByText("CS-10001")).toBeVisible();
+  await expect(page.getByText("No open cases")).toBeVisible();
   await page.getByRole("link", { name: "Sanctions" }).click();
-  await expect(page.getByText("OFAC SDN & Consolidated")).toBeVisible();
+  await expect(page.getByText("No watchlist sources")).toBeVisible();
 });

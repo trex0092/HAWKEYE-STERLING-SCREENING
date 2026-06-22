@@ -2,10 +2,20 @@
 
 import type { WalletRow } from "@/lib/data/console-datasets";
 import { riskColor } from "@/lib/console/derive";
+import { EmptyState } from "./EmptyState";
 
 const COLS = "minmax(170px,1.4fr) 70px 120px 110px 64px 150px";
 
 export function CryptoTable({ wallets }: { wallets: WalletRow[] }) {
+  if (wallets.length === 0) {
+    return (
+      <EmptyState
+        title="No wallets monitored"
+        hint="Add a crypto entity to track wallet and VASP exposure."
+        icon="◈"
+      />
+    );
+  }
   return (
     <div
       style={{

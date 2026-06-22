@@ -1,8 +1,18 @@
 "use client";
 
 import type { SanctionSourceRow } from "@/lib/data/console-datasets";
+import { EmptyState } from "./EmptyState";
 
 export function SanctionsGrid({ sources }: { sources: SanctionSourceRow[] }) {
+  if (sources.length === 0) {
+    return (
+      <EmptyState
+        title="No watchlist sources"
+        hint="Connect a sanctions source to feed the screening engine."
+        icon="🛡"
+      />
+    );
+  }
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
       {sources.map((x) => {

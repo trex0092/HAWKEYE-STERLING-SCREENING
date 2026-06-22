@@ -20,6 +20,12 @@ export default defineConfig({
     url: "http://localhost:3000",
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,
+    // Force the free integrations offline so the empty-shell e2e is deterministic
+    // (no live OpenSanctions / Google-News calls).
+    env: {
+      SANCTIONS_LIVE: "false",
+      ADVERSE_MEDIA_LIVE: "false",
+    },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

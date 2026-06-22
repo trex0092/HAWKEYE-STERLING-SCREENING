@@ -51,9 +51,9 @@ describe("parseGoogleNewsRss", () => {
 });
 
 describe("fetchAdverseMedia (offline)", () => {
-  it("returns deterministic seed hits without network", async () => {
+  it("returns an empty, non-live seed feed without network", async () => {
     const { hits, live } = await fetchAdverseMedia("Boris Volkov");
     expect(live).toBe(false);
-    expect(hits.length).toBeGreaterThan(0);
+    expect(hits).toHaveLength(0);
   });
 });

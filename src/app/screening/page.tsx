@@ -134,6 +134,16 @@ function slaUnder24(s: Subject): boolean {
   return g ? parseInt(g, 10) < 24 : false;
 }
 
+function walletExposure(wallets: typeof WALLETS): string {
+  const total = wallets.reduce(
+    (a, w) => a + (parseInt(w.exposure.replace(/[^0-9]/g, ""), 10) || 0),
+    0,
+  );
+  if (total >= 1_000_000) return `${(total / 1_000_000).toFixed(2)}M`;
+  if (total >= 1_000) return `${Math.round(total / 1_000)}K`;
+  return String(total);
+}
+
 export default function ScreeningConsole() {
   const [module, setModule] = useState<ModuleKey>("screening");
   const [subjects, setSubjects] = useState<Subject[]>(() => withAnalysts(SUBJECTS));
@@ -213,6 +223,22 @@ export default function ScreeningConsole() {
     return () => {
       alive = false;
     };
+  }, []);
+
+  // One-time reset for returning browsers: clear demo-era activity (audit log +
+  // bell notifications) left in localStorage so the console opens clean. Guarded
+  // by a version flag so activity the operator generates later is never wiped.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (localStorage.getItem("hawkeye.reset.v2")) return;
+      localStorage.removeItem("hawkeye.audit-log.v1");
+      localStorage.removeItem("hawkeye.bell-events.v1");
+      localStorage.setItem("hawkeye.reset.v2", new Date().toISOString());
+      window.dispatchEvent(new CustomEvent("hawkeye:audit-updated"));
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   // Mirror the persisted audit log into the timeline.
@@ -597,7 +623,7 @@ function moduleBrief(
         { k: "Wallets", v: String(WALLETS.length) },
         { k: "High-risk", v: String(WALLETS.filter((w) => w.risk >= 60).length), c: "#FF9F45" },
         { k: "Chains", v: String(new Set(WALLETS.map((w) => w.chain)).size) },
-        { k: "Exposure", v: "5.46M" },
+        { k: "Exposure", v: walletExposure(WALLETS) },
       ];
     case "vessels":
       return [

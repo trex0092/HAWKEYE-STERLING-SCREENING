@@ -2,10 +2,20 @@
 
 import type { VesselRow } from "@/lib/data/console-datasets";
 import { listChip, riskColor, vesselStatusTone } from "@/lib/console/derive";
+import { EmptyState } from "./EmptyState";
 
 const COLS = "minmax(150px,1.3fr) 92px 96px 110px 110px 56px 96px";
 
 export function VesselsTable({ vessels }: { vessels: VesselRow[] }) {
+  if (vessels.length === 0) {
+    return (
+      <EmptyState
+        title="No vessels tracked"
+        hint="Flagged vessels under maritime tracking appear here."
+        icon="⚓"
+      />
+    );
+  }
   return (
     <div
       style={{

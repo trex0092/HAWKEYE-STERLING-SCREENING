@@ -93,33 +93,35 @@ export function Header({ clock, alerts }: { clock: string; alerts: number }) {
             /
           </span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 12,
-            letterSpacing: "0.08em",
-            color: "#FF8A8A",
-            background: "rgba(255,87,87,0.1)",
-            border: "1px solid rgba(255,87,87,0.35)",
-            borderRadius: 999,
-            padding: "3px 10px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <span
+        {alerts > 0 && (
+          <div
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: "#FF6B6B",
-              boxShadow: "0 0 8px #FF6B6B",
-              animation: "pulseDot 2s ease-in-out infinite",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              letterSpacing: "0.08em",
+              color: "#FF8A8A",
+              background: "rgba(255,87,87,0.1)",
+              border: "1px solid rgba(255,87,87,0.35)",
+              borderRadius: 999,
+              padding: "3px 10px",
+              whiteSpace: "nowrap",
             }}
-          />
-          {alerts} ALERTS
-        </div>
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#FF6B6B",
+                boxShadow: "0 0 8px #FF6B6B",
+                animation: "pulseDot 2s ease-in-out infinite",
+              }}
+            />
+            {alerts} ALERTS
+          </div>
+        )}
         <span
           style={{ fontSize: 13, color: "#A3ADC0", letterSpacing: "0.08em", whiteSpace: "nowrap" }}
         >
