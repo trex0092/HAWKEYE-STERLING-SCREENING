@@ -38,11 +38,13 @@ export function SubjectDetail({
   onNotes,
   onSelectRelated,
   adverseMediaHeadlines,
+  adverseMediaLoading,
   screeningHits,
 }: {
   subject: Subject;
   related: Subject[];
   adverseMediaHeadlines?: MediaHit[];
+  adverseMediaLoading?: boolean;
   screeningHits?: { name: string; list: string; score: number; programs?: string[] }[];
   onReassign: (analystId: string) => void;
   onStatus: (s: SubjectStatus) => void;
@@ -454,9 +456,11 @@ export function SubjectDetail({
         </div>
       )}
 
-      {adverseMediaHeadlines && adverseMediaHeadlines.length > 0 && (
-        <div style={sectionTop}>
-          <div style={{ ...labelCap, marginBottom: 8 }}>Adverse Media</div>
+      <div style={sectionTop}>
+        <div style={{ ...labelCap, marginBottom: 8 }}>Adverse Media</div>
+        {adverseMediaLoading ? (
+          <div style={{ fontSize: 12, color: "#828DA4" }}>Scanning global coverage…</div>
+        ) : adverseMediaHeadlines && adverseMediaHeadlines.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {adverseMediaHeadlines.slice(0, 6).map((h, i) => {
               const tone = sentInfo(h.sent);
@@ -530,8 +534,10 @@ export function SubjectDetail({
               );
             })}
           </div>
-        </div>
-      )}
+        ) : (
+          <div style={{ fontSize: 12, color: "#828DA4" }}>No adverse media identified.</div>
+        )}
+      </div>
 
       <div>
         <div style={{ ...labelCap, marginBottom: 6 }}>Notes</div>

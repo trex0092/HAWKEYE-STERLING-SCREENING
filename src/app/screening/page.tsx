@@ -161,6 +161,7 @@ export default function ScreeningConsole() {
   const [sourcesLive, setSourcesLive] = useState(false);
   const [media, setMedia] = useState<MediaHit[] | null>(null);
   const [subjectMedia, setSubjectMedia] = useState<MediaHit[]>([]);
+  const [subjectMediaLoading, setSubjectMediaLoading] = useState(false);
   const mediaCache = useRef<Map<string, MediaHit[]>>(new Map());
   const [realAudit, setRealAudit] = useState<AuditRow[]>([]);
   const [syncing, setSyncing] = useState(false);
@@ -259,24 +260,34 @@ export default function ScreeningConsole() {
     const subj = subjects.find((s) => s.id === selectedId);
     if (!subj) {
       setSubjectMedia([]);
+      setSubjectMediaLoading(false);
       return;
     }
     const name = subj.name;
     const cached = mediaCache.current.get(name);
     if (cached) {
       setSubjectMedia(cached);
+      setSubjectMediaLoading(false);
       return;
     }
     let alive = true;
+    // Clear stale headlines from the prior subject and show the scanning state while
+    // this subject's coverage is fetched.
+    setSubjectMedia([]);
+    setSubjectMediaLoading(true);
     void (async () => {
       const r = await fetchJson<{ hits: MediaHit[]; live: boolean }>(
         `/api/adverse-media/news?subject=${encodeURIComponent(name)}`,
         { label: "adverse-media/news" },
       );
-      if (alive && r.ok && r.data) {
+      if (!alive) return;
+      if (r.ok && r.data) {
         mediaCache.current.set(name, r.data.hits);
         setSubjectMedia(r.data.hits);
+      } else {
+        setSubjectMedia([]);
       }
+      setSubjectMediaLoading(false);
     })();
     return () => {
       alive = false;
@@ -571,6 +582,7 @@ export default function ScreeningConsole() {
                 subject={selected}
                 related={related}
                 adverseMediaHeadlines={subjectMedia}
+                adverseMediaLoading={subjectMediaLoading}
                 screeningHits={selected.screeningHits}
                 onReassign={(id) => patchSelected({ analyst: id }, "Reassigned analyst")}
                 onStatus={(s: SubjectStatus) => patchSelected({ status: s }, `Status → ${s}`)}

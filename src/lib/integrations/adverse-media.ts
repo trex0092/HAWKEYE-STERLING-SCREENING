@@ -11,7 +11,7 @@
 
 import { fetchTextWithTimeout, fetchJsonWithTimeout } from "@/lib/integrations/http";
 import { liveEnabled } from "@/lib/integrations/config";
-import { classifyAdverseMedia } from "@/lib/ai/anthropic";
+import { classifyAdverseMedia, researchAdverseMedia } from "@/lib/ai/anthropic";
 import { MEDIA, type MediaHit } from "@/lib/data/console-datasets";
 
 function decodeEntities(s: string): string {
@@ -211,6 +211,15 @@ export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaRe
   if (subject) {
     const gdelt = await fetchGdelt(subject);
     if (gdelt.length) return { hits: gdelt, live: true };
+
+    // Claude web search — reliable on serverless where Google-News RSS is IP-blocked.
+    // Returns MediaHit[] (already carries sentiment/category), [] when it searched and
+    // found nothing, or null when no client/key (dev/local) or on error.
+    const researched = await researchAdverseMedia(subject);
+    if (researched) return { hits: researched, live: true };
+    // researched === null → no Anthropic client (dev/local) → fall through to the
+    // Google-News scrape, which works there. On a keyed deploy the array result above
+    // is authoritative, so we never reach the RSS path that returns nothing anyway.
   }
 
   const query = subject
