@@ -1,13 +1,15 @@
-// ── Adverse media (free, worldwide) ──────────────────────────────────────────
-// The feed is LIVE by default everywhere (dev + prod). Its PRIMARY source is the
-// GDELT DOC 2.0 API — a free, keyless global news index that is reachable from
-// serverless / cloud IPs. (Google News RSS is kept only as a fallback because it
-// blocks cloud IPs and returns nothing in production.) Both restrict the query
-// to negative financial-crime keywords, so coverage is adverse, global and
-// multi-language: a subject's local press surfaces alongside the wires. Live
-// results are never replaced with mock data — a failed/empty fetch returns no
-// headlines. Only the deterministic unit-test runner (NODE_ENV=test), or an
-// explicit ADVERSE_MEDIA_LIVE=false, falls back to the seed fixtures.
+// ── Adverse media (AI + free, worldwide, lifetime) ───────────────────────────
+// The feed is LIVE by default everywhere (dev + prod). When an ANTHROPIC_API_KEY
+// is present its PRIMARY source is Claude web search (researchAdverseMedia),
+// which covers the subject's ENTIRE history — not just recent months — and works
+// from serverless / cloud IPs. GDELT DOC 2.0 (a free, keyless global news index)
+// and Google-News RSS are keyless fallbacks used when the lifetime search is
+// empty or unavailable: GDELT covers only ~recent months, and RSS is kept for
+// dev/local since it blocks cloud IPs in production. Every source restricts to
+// negative financial-crime coverage. Live results are never replaced with mock
+// data — a failed/empty fetch returns no headlines. Only the deterministic
+// unit-test runner (NODE_ENV=test), or an explicit ADVERSE_MEDIA_LIVE=false,
+// falls back to the seed fixtures.
 
 import { fetchTextWithTimeout, fetchJsonWithTimeout } from "@/lib/integrations/http";
 import { liveEnabled } from "@/lib/integrations/config";
@@ -209,17 +211,21 @@ export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaRe
   // blocks them and returns nothing in production). Falls through to the
   // Google-News scrape only when GDELT returns nothing.
   if (subject) {
+    // Primary: lifetime adverse media via Claude web search — covers the subject's ENTIRE
+    // history (any year, not just recent) and works from serverless IPs where Google-News
+    // RSS is blocked. Returns MediaHit[] with hits, [] when it searched and found nothing,
+    // or null when there is no API key (dev/local) or the call errors.
+    const researched = await researchAdverseMedia(subject);
+    if (researched && researched.length) return { hits: researched, live: true };
+
+    // Supplement / fallback: GDELT covers only ~recent months but is free and keyless —
+    // used when the lifetime search found nothing or is unavailable.
     const gdelt = await fetchGdelt(subject);
     if (gdelt.length) return { hits: gdelt, live: true };
 
-    // Claude web search — reliable on serverless where Google-News RSS is IP-blocked.
-    // Returns MediaHit[] (already carries sentiment/category), [] when it searched and
-    // found nothing, or null when no client/key (dev/local) or on error.
-    const researched = await researchAdverseMedia(subject);
-    if (researched) return { hits: researched, live: true };
-    // researched === null → no Anthropic client (dev/local) → fall through to the
-    // Google-News scrape, which works there. On a keyed deploy the array result above
-    // is authoritative, so we never reach the RSS path that returns nothing anyway.
+    // Claude ran (key present) but found nothing and GDELT is empty → genuine empty result;
+    // skip the RSS scrape, which is IP-blocked on serverless anyway.
+    if (researched) return { hits: [], live: true };
   }
 
   const query = subject

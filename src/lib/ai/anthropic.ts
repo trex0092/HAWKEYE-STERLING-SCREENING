@@ -210,13 +210,15 @@ export async function researchAdverseMedia(subject: string): Promise<MediaHit[] 
     { type: "web_search_20260209" as const, name: "web_search" as const, max_uses: 5 },
   ];
   const system =
-    "You are a financial-crime adverse-media analyst. Use web search to find RECENT, REAL " +
-    "negative news about the named subject: sanctions, fraud, money laundering, corruption, " +
-    "bribery, investigations, arrests, indictments, or regulatory action. Return ONLY compact " +
-    'JSON: {"hits":[{"headline":"","source":"","url":"","date":"DD Mon YYYY",' +
-    '"sentiment":"negative|neutral|positive","category":"<2-3 words>"}]} with up to 12 of the ' +
-    "most relevant items, most recent first. Use ONLY facts from the search results — never " +
-    'invent articles, sources, or URLs. If nothing about THIS subject is found, return {"hits":[]}.';
+    "You are a financial-crime adverse-media analyst. Use web search to find REAL negative " +
+    "news about the named subject from ANY point in the subject's ENTIRE history — not just " +
+    "recent coverage, however many years old: sanctions, fraud, money laundering, corruption, " +
+    "bribery, investigations, arrests, indictments, convictions, lawsuits, or regulatory " +
+    'action. Return ONLY compact JSON: {"hits":[{"headline":"","source":"","url":"",' +
+    '"date":"DD Mon YYYY","sentiment":"negative|neutral|positive","category":"<2-3 words>"}]} ' +
+    "with up to 15 of the most significant items, most recent first. Use ONLY facts from the " +
+    "search results — never invent articles, sources, or URLs. If nothing about THIS subject " +
+    'is found, return {"hits":[]}.';
   try {
     let messages: Anthropic.MessageParam[] = [{ role: "user", content: name }];
     let res = await client.messages.create({
