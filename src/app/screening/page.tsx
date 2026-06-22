@@ -42,10 +42,6 @@ import { NavRail } from "@/components/console/NavRail";
 import { AnalystHud } from "@/components/console/AnalystHud";
 import { SubjectRegister } from "@/components/console/SubjectRegister";
 import { CasesTable } from "@/components/console/CasesTable";
-import { SanctionsGrid } from "@/components/console/SanctionsGrid";
-import { MediaFeed } from "@/components/console/MediaFeed";
-import { CryptoTable } from "@/components/console/CryptoTable";
-import { VesselsTable } from "@/components/console/VesselsTable";
 import { AuditTimeline } from "@/components/console/AuditTimeline";
 import { SettingsPanel } from "@/components/console/SettingsPanel";
 import { SubjectDetail } from "@/components/console/SubjectDetail";
@@ -98,18 +94,12 @@ const VALID_LISTS = new Set<SanctionSource>([
 
 const TYPE_LABEL: Record<Draft["type"], string> = {
   individual: "Individual",
-  corporate: "Corporate",
   entity: "Entity",
-  vessel: "Vessel",
-  aircraft: "Aircraft",
 };
 
 const ENTITY_TYPE: Record<Draft["type"], EntityType> = {
   individual: "individual",
-  corporate: "organisation",
   entity: "other",
-  vessel: "vessel",
-  aircraft: "aircraft",
 };
 
 function withAnalysts(list: Subject[]): Subject[] {
@@ -545,15 +535,6 @@ export default function ScreeningConsole() {
               />
             )}
             {module === "cases" && <CasesTable subjects={subjects} onOpen={openCase} />}
-            {module === "sanctions" && <SanctionsGrid sources={sources ?? []} />}
-            {module === "media" && (
-              <MediaFeed
-                hits={selected ? subjectMedia : (media ?? [])}
-                subject={selected ? selected.name : undefined}
-              />
-            )}
-            {module === "crypto" && <CryptoTable wallets={WALLETS} />}
-            {module === "vessels" && <VesselsTable vessels={VESSELS} />}
             {module === "audit" && <AuditTimeline rows={auditRows} />}
             {module === "settings" && (
               <SettingsPanel

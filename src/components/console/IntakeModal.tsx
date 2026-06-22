@@ -56,6 +56,8 @@ export function IntakeModal({
   onRun: () => void;
 }) {
   const projRisk = draftRisk(draft);
+  // Gender only applies to individuals; disable it for entities.
+  const genderDisabled = draft.type !== "individual";
 
   return (
     <div
@@ -171,21 +173,19 @@ export function IntakeModal({
                 style={select}
               >
                 <option value="individual">Individual</option>
-                <option value="corporate">Corporate</option>
                 <option value="entity">Entity</option>
-                <option value="vessel">Vessel</option>
-                <option value="aircraft">Aircraft</option>
               </select>
             </div>
             <div>
               <label style={label}>Gender</label>
-              <div style={{ display: "flex", gap: 6 }}>
+              <div style={{ display: "flex", gap: 6, opacity: genderDisabled ? 0.4 : 1 }}>
                 {(["Male", "Female"] as const).map((g) => {
-                  const on = draft.gender === g;
+                  const on = !genderDisabled && draft.gender === g;
                   return (
                     <button
                       key={g}
                       type="button"
+                      disabled={genderDisabled}
                       onClick={() => onChange({ gender: g })}
                       style={{
                         flex: 1,
@@ -194,7 +194,7 @@ export function IntakeModal({
                         letterSpacing: "0.05em",
                         padding: "9px 0",
                         borderRadius: 7,
-                        cursor: "pointer",
+                        cursor: genderDisabled ? "not-allowed" : "pointer",
                         color: on ? "rgb(var(--ac))" : "#A3ADC0",
                         background: on ? "rgba(var(--ac),0.12)" : "transparent",
                         border: `1px solid ${on ? "rgba(var(--ac),0.5)" : "rgba(255,255,255,0.13)"}`,

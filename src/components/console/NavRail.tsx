@@ -5,10 +5,6 @@ import type { ModuleKey } from "@/lib/data/console-datasets";
 const NAV: { key: ModuleKey; label: string }[] = [
   { key: "screening", label: "Screening" },
   { key: "cases", label: "Cases" },
-  { key: "sanctions", label: "Sanctions" },
-  { key: "media", label: "Adverse Media" },
-  { key: "crypto", label: "Crypto" },
-  { key: "vessels", label: "Vessels" },
   { key: "audit", label: "Audit Log" },
   { key: "settings", label: "Settings" },
 ];

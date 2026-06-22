@@ -1,17 +1,17 @@
-// ── Adverse media (free, Google News, worldwide) ─────────────────────────────
-// The feed is LIVE by default everywhere (dev + prod) and searched WORLDWIDE:
-// it pulls negative-news headlines for a subject from every major Google News
-// locale edition (US, UK, Türkiye, Arabic, Russia, China, …) in parallel — no
-// API key required — then merges, de-duplicates and optionally enriches
-// sentiment/category with Claude. Coverage is global and multi-language, so a
-// subject's local press surfaces alongside the international wires. Live results
-// are never replaced with mock data — a failed/empty fetch returns no headlines.
-// Only the deterministic unit-test runner (NODE_ENV=test), or an explicit
-// ADVERSE_MEDIA_LIVE=false, falls back to the seed fixtures.
+// ── Adverse media (free, worldwide) ──────────────────────────────────────────
+// The feed is LIVE by default everywhere (dev + prod). Its PRIMARY source is the
+// GDELT DOC 2.0 API — a free, keyless global news index that is reachable from
+// serverless / cloud IPs. (Google News RSS is kept only as a fallback because it
+// blocks cloud IPs and returns nothing in production.) Both restrict the query
+// to negative financial-crime keywords, so coverage is adverse, global and
+// multi-language: a subject's local press surfaces alongside the wires. Live
+// results are never replaced with mock data — a failed/empty fetch returns no
+// headlines. Only the deterministic unit-test runner (NODE_ENV=test), or an
+// explicit ADVERSE_MEDIA_LIVE=false, falls back to the seed fixtures.
 
-import { fetchTextWithTimeout } from "@/lib/integrations/http";
+import { fetchTextWithTimeout, fetchJsonWithTimeout } from "@/lib/integrations/http";
 import { liveEnabled } from "@/lib/integrations/config";
-import { classifyAdverseMedia, researchAdverseMedia } from "@/lib/ai/anthropic";
+import { classifyAdverseMedia } from "@/lib/ai/anthropic";
 import { MEDIA, type MediaHit } from "@/lib/data/console-datasets";
 
 function decodeEntities(s: string): string {
@@ -65,6 +65,74 @@ function seedFeed(subject: string): MediaHit[] {
   if (!subject) return MEDIA;
   const lc = subject.toLowerCase();
   return MEDIA.filter((m) => m.subject.toLowerCase().includes(lc));
+}
+
+// ── GDELT DOC 2.0 (primary live source) ──────────────────────────────────────
+// A free, keyless global news index reachable from serverless / cloud IPs —
+// unlike Google News RSS, which blocks those IPs and returns nothing in
+// production. We restrict the query to negative financial-crime keywords so the
+// result set is adverse coverage, newest first.
+interface GdeltArticle {
+  url?: string;
+  title?: string;
+  seendate?: string;
+  domain?: string;
+}
+
+const GDELT_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+// GDELT stamps articles like "20260610T120000Z" → render as "10 Jun 2026".
+function gdeltDate(s: string | undefined): string {
+  if (!s || s.length < 8) return "";
+  const mo = parseInt(s.slice(4, 6), 10);
+  if (!Number.isFinite(mo) || mo < 1 || mo > 12) return "";
+  return `${s.slice(6, 8)} ${GDELT_MONTHS[mo - 1]} ${s.slice(0, 4)}`;
+}
+
+async function fetchGdelt(subject: string): Promise<MediaHit[]> {
+  const query = `"${subject}" (sanction OR sanctions OR fraud OR laundering OR corruption OR bribery OR investigation OR arrest OR indictment OR probe OR raid)`;
+  const url =
+    `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}` +
+    `&mode=artlist&format=json&maxrecords=25&sort=datedesc`;
+  const res = await fetchJsonWithTimeout(url, {
+    headers: { "user-agent": "Mozilla/5.0 HawkeyeSterlingScreening/1.0" },
+  });
+  if (!res.ok || !res.data || typeof res.data !== "object") return [];
+  const articles = (res.data as { articles?: unknown }).articles;
+  if (!Array.isArray(articles)) return [];
+
+  const seen = new Set<string>();
+  const out: MediaHit[] = [];
+  for (const a of articles as GdeltArticle[]) {
+    const headline = (a.title ?? "").trim();
+    if (!headline) continue;
+    const key = headline.toLowerCase().replace(/\s+/g, " ").trim();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      subject,
+      cat: "News",
+      source: a.domain ?? "GDELT",
+      date: gdeltDate(a.seendate),
+      sent: "negative",
+      headline,
+      url: a.url ?? "",
+    });
+  }
+  return out.slice(0, 25);
 }
 
 export interface AdverseMediaResult {
@@ -136,13 +204,13 @@ export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaRe
   // deployments NEVER serve seed/mock news — the feed is all live.
   if (!live) return { hits: seedFeed(subject), live: false };
 
-  // Primary live source: Claude's server-side web search. It runs on Anthropic's
-  // infrastructure, so it returns real coverage even where direct news-site
-  // scraping is blocked (e.g. serverless deploys). Falls through to the
-  // Google-News scrape only when the model is unavailable (no key / error).
+  // Primary live source: GDELT DOC 2.0 — a free, keyless global news index that
+  // is reachable from serverless / cloud IPs (unlike Google News RSS, which
+  // blocks them and returns nothing in production). Falls through to the
+  // Google-News scrape only when GDELT returns nothing.
   if (subject) {
-    const researched = await researchAdverseMedia(subject);
-    if (researched !== null) return { hits: researched, live: true };
+    const gdelt = await fetchGdelt(subject);
+    if (gdelt.length) return { hits: gdelt, live: true };
   }
 
   const query = subject

@@ -4,7 +4,7 @@ export type { ModuleKey };
 
 export type Density = "Comfortable" | "Compact";
 
-export type DraftType = "individual" | "corporate" | "entity" | "vessel" | "aircraft";
+export type DraftType = "individual" | "entity";
 
 export interface ConsoleSettings {
   sync: boolean;

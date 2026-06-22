@@ -11,10 +11,8 @@ test("the subject register ships empty", async ({ page }) => {
   await expect(page.getByText("No subjects yet")).toBeVisible();
 });
 
-test("switching modules swaps the centre content (all empty)", async ({ page }) => {
+test("switching modules swaps the centre content", async ({ page }) => {
   await page.goto("/screening");
   await page.getByRole("link", { name: "Cases" }).click();
   await expect(page.getByText("No open cases")).toBeVisible();
-  await page.getByRole("link", { name: "Sanctions" }).click();
-  await expect(page.getByText("No watchlist sources")).toBeVisible();
 });
