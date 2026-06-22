@@ -1,5 +1,4 @@
 import type { Subject } from "@/lib/types";
-import type { Operator } from "@/lib/data/operators";
 
 // Representative records for component / shape tests. The production app ships
 // with empty registers (see src/lib/data/*); these fixtures preserve render
@@ -50,16 +49,5 @@ export const SEED_SUBJECTS: Subject[] = [
     mostSerious: "high",
     openedAgo: "13/06/2026",
     analyst: "ember",
-  },
-];
-
-export const SEED_OPERATORS: Operator[] = [
-  {
-    id: "ember",
-    img: "/personas/persona-ember.webp",
-    pos: "50% 22%",
-    name: "Ember",
-    role: "PEP & Adverse Media",
-    ac: "255,87,87",
   },
 ];

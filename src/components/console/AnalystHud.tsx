@@ -12,14 +12,13 @@ export function AnalystHud({
   duty,
   uptime,
 }: {
-  analyst: Operator | undefined;
+  analyst: Operator;
   threat: { t: string; c: string };
   caseLabel: string;
   duty: string;
   uptime: string;
 }) {
-  // Neutral grey accent when no analyst is assigned (empty roster → standby HUD).
-  const ac = analyst?.ac ?? "100,111,134";
+  const ac = analyst.ac;
   const b = `2px solid rgba(${ac},0.7)`;
 
   return (
@@ -156,9 +155,9 @@ export function AnalystHud({
               width: "100%",
               height: "100%",
               backgroundColor: "#070A11",
-              backgroundImage: analyst ? `url('${analyst.img}')` : "none",
+              backgroundImage: `url('${analyst.img}')`,
               backgroundSize: "cover",
-              backgroundPosition: analyst?.pos ?? "center",
+              backgroundPosition: analyst.pos,
             }}
           />
         </div>
@@ -194,10 +193,10 @@ export function AnalystHud({
           letterSpacing: "0.02em",
         }}
       >
-        {analyst?.name ?? "Standby"}
+        {analyst.name}
       </div>
       <div style={{ fontSize: 11.5, color: "#A3ADC0", marginTop: 1, letterSpacing: "0.04em" }}>
-        {analyst?.role ?? "No analyst assigned"}
+        {analyst.role}
       </div>
       <div
         style={{

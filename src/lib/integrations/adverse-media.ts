@@ -136,11 +136,9 @@ export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaRe
   // deployments NEVER serve seed/mock news — the feed is all live.
   if (!live) return { hits: seedFeed(subject), live: false };
 
-  // A bare module load (no subject) must not surface a general news feed — the
-  // console ships empty and only screens real coverage for a named subject.
-  if (!subject) return { hits: [], live: true };
-
-  const query = `${subject} (sanction OR fraud OR laundering OR investigation OR bribery OR corruption OR arrest OR indictment)`;
+  const query = subject
+    ? `${subject} (sanction OR fraud OR laundering OR investigation OR bribery OR corruption OR arrest OR indictment)`
+    : "sanctions enforcement OR money laundering";
 
   // Query every world edition in parallel; each helper resolves (never throws).
   const results = await Promise.all(
