@@ -10,6 +10,10 @@ import { fetchAdverseMedia } from "@/lib/integrations/adverse-media";
 import { authorize } from "@/lib/auth/rbac";
 import { rateLimit, rateLimitKey } from "@/lib/auth/rate-limit";
 
+// Screening folds in adverse media (GDELT + a bounded Claude web search) plus AI
+// reasoning; give it room under Netlify's 26s synchronous function cap (default 10s).
+export const maxDuration = 26;
+
 // ── Subject auto-screen ──────────────────────────────────────────────────────
 // Free, no-key by default in production: name-matches the subject against the
 // open OpenSanctions / yente index (sanctions + PEP topics) AND against the free

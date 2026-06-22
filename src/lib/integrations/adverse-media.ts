@@ -1,15 +1,15 @@
-// ── Adverse media (AI + free, worldwide, lifetime) ───────────────────────────
-// The feed is LIVE by default everywhere (dev + prod). When an ANTHROPIC_API_KEY
-// is present its PRIMARY source is Claude web search (researchAdverseMedia),
-// which covers the subject's ENTIRE history — not just recent months — and works
-// from serverless / cloud IPs. GDELT DOC 2.0 (a free, keyless global news index)
-// and Google-News RSS are keyless fallbacks used when the lifetime search is
-// empty or unavailable: GDELT covers only ~recent months, and RSS is kept for
-// dev/local since it blocks cloud IPs in production. Every source restricts to
-// negative financial-crime coverage. Live results are never replaced with mock
-// data — a failed/empty fetch returns no headlines. Only the deterministic
-// unit-test runner (NODE_ENV=test), or an explicit ADVERSE_MEDIA_LIVE=false,
-// falls back to the seed fixtures.
+// ── Adverse media (free + AI, worldwide) ─────────────────────────────────────
+// The feed is LIVE by default everywhere (dev + prod). Its PRIMARY source is the
+// GDELT DOC 2.0 API — a free, keyless global news index reachable from serverless
+// / cloud IPs — so the synchronous request returns fast and never hangs. When
+// GDELT has no recent coverage for a named subject and an ANTHROPIC_API_KEY is
+// present, a STRICTLY TIME-BOXED Claude web search runs as a fallback for lifetime
+// coverage (the subject's entire history, any year). Google-News RSS is a final
+// fallback kept for dev/local only — it blocks cloud IPs in production. Every
+// source restricts to negative financial-crime coverage. Live results are never
+// replaced with mock data — a failed/empty fetch returns no headlines. Only the
+// deterministic unit-test runner (NODE_ENV=test), or an explicit
+// ADVERSE_MEDIA_LIVE=false, falls back to the seed fixtures.
 
 import { fetchTextWithTimeout, fetchJsonWithTimeout } from "@/lib/integrations/http";
 import { liveEnabled } from "@/lib/integrations/config";
@@ -105,7 +105,14 @@ function gdeltDate(s: string | undefined): string {
 }
 
 async function fetchGdelt(subject: string): Promise<MediaHit[]> {
-  const query = `"${subject}" (sanction OR sanctions OR fraud OR laundering OR corruption OR bribery OR investigation OR arrest OR indictment OR probe OR raid)`;
+  // With a subject, scope to that name's negative coverage. Without one (the general
+  // landing feed), pull the latest worldwide financial-crime news — GDELT is keyless
+  // and reachable from serverless / cloud IPs, unlike the Google-News RSS scrape.
+  const crime =
+    "(sanction OR sanctions OR fraud OR laundering OR corruption OR bribery OR investigation OR arrest OR indictment OR probe OR raid)";
+  const query = subject
+    ? `"${subject}" ${crime}`
+    : "(sanctions enforcement OR money laundering OR financial fraud OR corruption OR bribery OR embezzlement)";
   const url =
     `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}` +
     `&mode=artlist&format=json&maxrecords=25&sort=datedesc`;
@@ -125,7 +132,7 @@ async function fetchGdelt(subject: string): Promise<MediaHit[]> {
     if (seen.has(key)) continue;
     seen.add(key);
     out.push({
-      subject,
+      subject: subject || "Watchlist",
       cat: "News",
       source: a.domain ?? "GDELT",
       date: gdeltDate(a.seendate),
@@ -206,28 +213,30 @@ export async function fetchAdverseMedia(subject: string): Promise<AdverseMediaRe
   // deployments NEVER serve seed/mock news — the feed is all live.
   if (!live) return { hits: seedFeed(subject), live: false };
 
-  // Primary live source: GDELT DOC 2.0 — a free, keyless global news index that
-  // is reachable from serverless / cloud IPs (unlike Google News RSS, which
-  // blocks them and returns nothing in production). Falls through to the
-  // Google-News scrape only when GDELT returns nothing.
+  // Primary live source: GDELT DOC 2.0 — a free, keyless global news index reachable
+  // from serverless / cloud IPs (unlike Google News RSS, which they block). It is fast,
+  // so it backs the synchronous response for BOTH the per-subject panel and the general
+  // landing feed. The slow Claude web search is only a bounded fallback (below) — never
+  // the blocking first call — so the route can't exceed the function timeout.
+  const gdelt = await fetchGdelt(subject);
+  if (gdelt.length) return { hits: gdelt, live: true };
+
   if (subject) {
-    // Primary: lifetime adverse media via Claude web search — covers the subject's ENTIRE
-    // history (any year, not just recent) and works from serverless IPs where Google-News
-    // RSS is blocked. Returns MediaHit[] with hits, [] when it searched and found nothing,
-    // or null when there is no API key (dev/local) or the call errors.
+    // GDELT had nothing recent → bounded lifetime fallback via Claude web search, which
+    // covers the subject's ENTIRE history (any year) and works from serverless IPs. It is
+    // strictly time-boxed (see researchAdverseMedia) so it can't blow the function budget.
+    // Returns MediaHit[] with hits, [] when it searched and found nothing, or null when
+    // there is no API key (dev/local) or the call errors / times out.
     const researched = await researchAdverseMedia(subject);
     if (researched && researched.length) return { hits: researched, live: true };
 
-    // Supplement / fallback: GDELT covers only ~recent months but is free and keyless —
-    // used when the lifetime search found nothing or is unavailable.
-    const gdelt = await fetchGdelt(subject);
-    if (gdelt.length) return { hits: gdelt, live: true };
-
-    // Claude ran (key present) but found nothing and GDELT is empty → genuine empty result;
-    // skip the RSS scrape, which is IP-blocked on serverless anyway.
+    // Claude ran (key present) but found nothing → genuine empty result; skip the RSS
+    // scrape, which is IP-blocked on serverless anyway.
     if (researched) return { hits: [], live: true };
   }
 
+  // No Anthropic key (dev/local), or a general feed with an empty GDELT result → the
+  // Google-News RSS scrape, which works in dev/local but is IP-blocked in production.
   const query = subject
     ? `${subject} (sanction OR fraud OR laundering OR investigation OR bribery OR corruption OR arrest OR indictment)`
     : "sanctions enforcement OR money laundering";

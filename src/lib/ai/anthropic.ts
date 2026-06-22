@@ -79,14 +79,17 @@ export async function classifyAdverseMedia(
   const promptHash = hashText(`${subject}\n${headline}`);
   recordThreatScan("classifyAdverseMedia", MODEL, promptHash, headline);
   try {
-    const res = await client.messages.create({
-      model: MODEL,
-      max_tokens: 200,
-      system:
-        "You are a financial-crime adverse-media analyst. For a news headline about a screened subject, " +
-        'return ONLY compact JSON: {"sentiment":"negative|positive|neutral","category":"<2-3 word category>"}.',
-      messages: [{ role: "user", content: `Subject: ${subject}\nHeadline: ${headline}` }],
-    });
+    const res = await client.messages.create(
+      {
+        model: MODEL,
+        max_tokens: 200,
+        system:
+          "You are a financial-crime adverse-media analyst. For a news headline about a screened subject, " +
+          'return ONLY compact JSON: {"sentiment":"negative|positive|neutral","category":"<2-3 word category>"}.',
+        messages: [{ role: "user", content: `Subject: ${subject}\nHeadline: ${headline}` }],
+      },
+      { timeout: 8_000, maxRetries: 1 },
+    );
     const parsed = coerceClassification(safeJson(firstText(res)));
     recordLlmCall({
       task: "classifyAdverseMedia",
@@ -122,15 +125,18 @@ export async function screeningReasoning(
   const promptHash = hashText(content);
   recordThreatScan("screeningReasoning", MODEL, promptHash, content);
   try {
-    const res = await client.messages.create({
-      model: MODEL,
-      max_tokens: 400,
-      system:
-        "You are an AML/sanctions screening analyst. Given a subject and its watchlist hits, return ONLY " +
-        'compact JSON: {"summary":"<one sentence>","decision":"clear|review|escalate|block",' +
-        '"score":<0-100>,"factors":["<short factor>", ...]}.',
-      messages: [{ role: "user", content }],
-    });
+    const res = await client.messages.create(
+      {
+        model: MODEL,
+        max_tokens: 400,
+        system:
+          "You are an AML/sanctions screening analyst. Given a subject and its watchlist hits, return ONLY " +
+          'compact JSON: {"summary":"<one sentence>","decision":"clear|review|escalate|block",' +
+          '"score":<0-100>,"factors":["<short factor>", ...]}.',
+        messages: [{ role: "user", content }],
+      },
+      { timeout: 8_000, maxRetries: 1 },
+    );
     // The model's free-text fields are untrusted; coerceReasoning forces the
     // decision onto a whitelist and clamps the score before it reaches a typed
     // compliance field.
@@ -207,7 +213,7 @@ export async function researchAdverseMedia(subject: string): Promise<MediaHit[] 
   const promptHash = hashText(`adverse-media:${name}`);
   recordThreatScan("researchAdverseMedia", MODEL, promptHash, name);
   const tools = [
-    { type: "web_search_20260209" as const, name: "web_search" as const, max_uses: 5 },
+    { type: "web_search_20260209" as const, name: "web_search" as const, max_uses: 3 },
   ];
   const system =
     "You are a financial-crime adverse-media analyst. Use web search to find REAL negative " +
@@ -219,25 +225,28 @@ export async function researchAdverseMedia(subject: string): Promise<MediaHit[] 
     "with up to 15 of the most significant items, most recent first. Use ONLY facts from the " +
     "search results — never invent articles, sources, or URLs. If nothing about THIS subject " +
     'is found, return {"hits":[]}.';
+  // Hard wall-clock budget for the whole server-tool loop so this can never exceed the
+  // serverless function timeout (Netlify caps synchronous functions at ~26s). Each call
+  // gets the remaining budget as its timeout and no retries — the SDK default is a 10-min
+  // timeout with 2 retries, and timeouts are retried, which is fatal on serverless. On a
+  // timeout the SDK throws → caught below → returns null so the caller falls back cleanly.
+  const deadline = Date.now() + 12_000;
+  const reqOpts = () => ({ timeout: Math.max(1, deadline - Date.now()), maxRetries: 0 });
   try {
     let messages: Anthropic.MessageParam[] = [{ role: "user", content: name }];
-    let res = await client.messages.create({
-      model: MODEL,
-      max_tokens: 2000,
-      system,
-      tools,
-      messages,
-    });
-    // Server-tool loop: the model pauses while it runs searches.
-    for (let i = 0; i < 3 && (res.stop_reason as string) === "pause_turn"; i++) {
+    let res = await client.messages.create(
+      { model: MODEL, max_tokens: 2000, system, tools, messages },
+      reqOpts(),
+    );
+    // Server-tool loop: the model pauses while it runs searches. Bounded by both the
+    // iteration cap and the wall-clock deadline above.
+    for (let i = 0; i < 2 && (res.stop_reason as string) === "pause_turn"; i++) {
+      if (deadline - Date.now() <= 0) break;
       messages = [...messages, { role: "assistant", content: res.content }];
-      res = await client.messages.create({
-        model: MODEL,
-        max_tokens: 2000,
-        system,
-        tools,
-        messages,
-      });
+      res = await client.messages.create(
+        { model: MODEL, max_tokens: 2000, system, tools, messages },
+        reqOpts(),
+      );
     }
     const parsed = safeJson<{ hits?: unknown }>(allText(res));
     if (!parsed || !Array.isArray(parsed.hits)) {

@@ -9,6 +9,9 @@ import { liveEnabled } from "@/lib/integrations/config";
 // is "clear" with no headlines — never a fabricated tier from a name hash.
 
 export const dynamic = "force-dynamic";
+// Give the bounded Claude web-search fallback room under Netlify's 26s synchronous
+// function cap (default is 10s); the GDELT-first path returns in ~1-2s.
+export const maxDuration = 26;
 
 type AdverseMediaBody = { subject?: string; limit?: number };
 

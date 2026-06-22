@@ -8,6 +8,9 @@ import { anthropicConfigured } from "@/lib/ai/anthropic";
 // runner (or an explicit ADVERSE_MEDIA_LIVE=false) returns deterministic seed hits.
 
 export const dynamic = "force-dynamic";
+// Give the bounded Claude web-search fallback room under Netlify's 26s synchronous
+// function cap (default is 10s); the GDELT-first path returns in ~1-2s.
+export const maxDuration = 26;
 
 export async function GET(req: Request) {
   const subject = new URL(req.url).searchParams.get("subject") ?? "";
