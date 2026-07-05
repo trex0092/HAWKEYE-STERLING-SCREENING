@@ -8,6 +8,9 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg)](#contributors)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A compliance & sanctions **screening console** — a dense, keyboard-driven analyst
 workspace for triaging subjects against sanctions lists, PEP databases, adverse
@@ -90,12 +93,16 @@ Open <http://localhost:3000> — `/` redirects to **`/screening`**.
 - **Unit / integration** — [Vitest](https://vitest.dev). Covers the pure helpers,
   the seed-data invariants, and the mock API route handlers; one component render
   test runs under jsdom. Run `npm run test`.
+- **Coverage** — `npm run test:coverage` reports coverage for `src/lib/**` and
+  enforces baseline thresholds (statements 65% / branches 55% / functions 72% /
+  lines 68%). CI publishes a coverage summary and uploads the HTML report as an
+  artifact.
 - **End-to-end** — [Playwright](https://playwright.dev) (Chromium) drives the built
   app. Run `npm run e2e` (it builds + boots the server automatically; first run:
   `npx playwright install --with-deps chromium`).
 
-CI runs type-check, lint, format check, unit tests, and build on every push/PR to
-`main`; the Playwright suite runs as its own workflow.
+CI runs type-check, lint, format check, unit tests **with coverage**, and build on
+every push/PR to `main`; the Playwright suite runs as its own workflow.
 
 ## Docker
 
@@ -251,6 +258,30 @@ schedule:
 
 Report vulnerabilities privately per the [Security Policy](./SECURITY.md) —
 never in a public issue.
+
+## Contributors
+
+Thanks to everyone who contributes to this project. This list follows the
+[all-contributors](https://allcontributors.org) specification — contributions of
+any kind (code, docs, ideas, review, infrastructure) are welcome and recognised.
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/trex0092"><img src="https://github.com/trex0092.png" width="100px;" alt="HAWKEYE Sterling"/><br /><sub><b>HAWKEYE Sterling</b></sub></a><br /><a href="#maintenance-trex0092" title="Maintenance">🚧</a> <a href="https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/commits?author=trex0092" title="Code">💻</a> <a href="https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/commits?author=trex0092" title="Documentation">📖</a> <a href="#infra-trex0092" title="Infrastructure">🚇</a> <a href="https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/pulls?q=is%3Apr+reviewed-by%3Atrex0092" title="Reviewed Pull Requests">👀</a></td>
+    </tr>
+  </tbody>
+</table>
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+To add a contributor, see the
+[all-contributors CLI](https://allcontributors.org/docs/en/cli/usage) or the
+`.all-contributorsrc` configuration.
 
 ## License
 

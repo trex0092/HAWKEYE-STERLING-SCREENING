@@ -15,6 +15,12 @@ const eslintConfig = [
   },
   ...nextCoreWebVitals,
   {
+    // Pin the React version so eslint-plugin-react skips runtime version
+    // auto-detection, which crashes under ESLint 10 (getFilename is not a
+    // function). Matches the "react" version in package.json.
+    settings: { react: { version: "19.2" } },
+  },
+  {
     rules: {
       // The new react-hooks (v6) rules are too aggressive for an SSR app that
       // hydrates client state from localStorage after mount (setState-in-effect
