@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: HAWKEYE · Sterling Screening
+message: >-
+  If you use this software or reference its architecture, please cite it
+  using the metadata below.
+type: software
+authors:
+  - name: HAWKEYE Sterling
+repository-code: "https://github.com/trex0092/HAWKEYE-STERLING-SCREENING"
+url: "https://github.com/trex0092/HAWKEYE-STERLING-SCREENING#readme"
+abstract: >-
+  A compliance and sanctions screening console — a dense, keyboard-driven
+  analyst workspace for triaging subjects against sanctions lists, PEP
+  databases, adverse media, and corporate/ownership intelligence. Distributed
+  as an offline demo / reference build.
+keywords:
+  - compliance
+  - sanctions-screening
+  - kyc
+  - aml
+  - nextjs
+  - typescript
+license: MIT
+version: 0.1.0

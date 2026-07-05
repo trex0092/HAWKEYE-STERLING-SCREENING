@@ -1,0 +1,31 @@
+name: Sync labels
+
+# Keeps the repository's issue/PR labels in sync with .github/labels.yml,
+# so triage labels are version-controlled and reviewable.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/labels.yml"
+      - ".github/workflows/labels.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Apply label definitions
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Sync labels
+        uses: crazy-max/ghaction-github-labeler@v5
+        with:
+          yaml-file: .github/labels.yml
+          # Do not delete labels that aren't listed (e.g. GitHub defaults).
+          skip-delete: true

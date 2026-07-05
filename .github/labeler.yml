@@ -1,0 +1,42 @@
+# Path-based auto-labeling for pull requests (actions/labeler v5 syntax).
+# Referenced labels are defined in .github/labels.yml.
+
+"area: ci":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - ".github/**/*.yml"
+          - "eslint.config.mjs"
+          - "playwright.config.ts"
+          - "vitest.config.mts"
+          - "next.config.mjs"
+          - "postcss.config.mjs"
+          - "tsconfig.json"
+
+"area: dependencies":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "package-lock.json"
+
+"area: docs":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**"
+          - "CITATION.cff"
+          - "LICENSE"
+
+"area: app":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**"
+          - "public/**"
+
+test:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tests/**"
+          - "e2e/**"
+          - "**/*.test.ts"
+          - "**/*.test.tsx"

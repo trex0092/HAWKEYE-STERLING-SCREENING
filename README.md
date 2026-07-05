@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/ci.yml/badge.svg)](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/ci.yml)
 [![E2E](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/e2e.yml/badge.svg)](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/e2e.yml)
+[![CodeQL](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/codeql.yml/badge.svg)](https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/trex0092/HAWKEYE-STERLING-SCREENING/badge)](https://securityscorecards.dev/viewer/?uri=github.com/trex0092/HAWKEYE-STERLING-SCREENING)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/)
@@ -204,8 +206,39 @@ same env vars on the deploy.
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md). Please also read the
-[Code of Conduct](./CODE_OF_CONDUCT.md) and report vulnerabilities per the
-[Security Policy](./SECURITY.md).
+[Code of Conduct](./CODE_OF_CONDUCT.md), and get help via
+[SUPPORT.md](./.github/SUPPORT.md).
+
+## Governance & security
+
+This project follows a documented, transparent governance and compliance model:
+
+| Area | Where |
+|---|---|
+| Project governance & decision-making | [`GOVERNANCE.md`](./GOVERNANCE.md) |
+| Contribution workflow | [`CONTRIBUTING.md`](./CONTRIBUTING.md) |
+| Community standards | [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) |
+| Getting support | [`SUPPORT.md`](./.github/SUPPORT.md) |
+| Security & vulnerability disclosure | [`SECURITY.md`](./SECURITY.md) |
+| Code owners / required reviewers | [`.github/CODEOWNERS`](./.github/CODEOWNERS) |
+| Dependency automation | [`.github/dependabot.yml`](./.github/dependabot.yml) |
+| Citation metadata | [`CITATION.cff`](./CITATION.cff) |
+| AI-system & control governance | [`docs/governance/`](./docs/governance/README.md) |
+
+**Automated compliance checks** run in CI on every pull request and on a
+schedule:
+
+- **CodeQL** — static application security testing
+  ([`codeql.yml`](./.github/workflows/codeql.yml)).
+- **Dependency Review** — blocks vulnerable or non-compliant dependencies
+  ([`dependency-review.yml`](./.github/workflows/dependency-review.yml)).
+- **OpenSSF Scorecard** — supply-chain security posture
+  ([`scorecard.yml`](./.github/workflows/scorecard.yml)).
+- **Type-check, lint, format, unit & E2E tests, build**
+  ([`ci.yml`](./.github/workflows/ci.yml), [`e2e.yml`](./.github/workflows/e2e.yml)).
+
+Report vulnerabilities privately per the [Security Policy](./SECURITY.md) —
+never in a public issue.
 
 ## License
 

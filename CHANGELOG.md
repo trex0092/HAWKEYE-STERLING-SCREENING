@@ -8,6 +8,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **GitHub governance & compliance hardening** — completed the community-health
+  and supply-chain security baseline: a project `GOVERNANCE.md`, `SUPPORT.md`,
+  `CITATION.cff`, and a `FUNDING.yml` placeholder; version-controlled issue
+  labels (`.github/labels.yml`) with a sync workflow; automatic path-based PR
+  labeling; and three scheduled/PR security checks — **CodeQL** (SAST),
+  **Dependency Review** (vulnerable/non-compliant dependency gating), and
+  **OpenSSF Scorecard** (supply-chain posture). README now surfaces a
+  Governance & security section plus CodeQL and Scorecard badges.
+
 - **Keyless sanctions + PEP screening from free bundled lists** — a build-time
   step (`scripts/build-sanctions-index.mjs`) downloads the free, openly-licensed
   OpenSanctions consolidated lists (OFAC, UN, EU, UK, Interpol) and PEP dataset
