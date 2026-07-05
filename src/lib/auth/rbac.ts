@@ -13,11 +13,7 @@
 export type Role = "analyst" | "mlro" | "auditor" | "admin";
 
 export type Permission =
-  | "screen.run"
-  | "case.disposition"
-  | "signoff.hard-outcome"
-  | "audit.export"
-  | "config.manage";
+  "screen.run" | "case.disposition" | "signoff.hard-outcome" | "audit.export" | "config.manage";
 
 const ROLES: ReadonlyArray<Role> = ["analyst", "mlro", "auditor", "admin"];
 

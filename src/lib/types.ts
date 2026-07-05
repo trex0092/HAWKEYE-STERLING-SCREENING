@@ -9,15 +9,7 @@ export type SubjectStatus = "active" | "review" | "escalated" | "cleared";
 export type SortKey = "name" | "riskScore" | "slaNotify" | "status" | "cddPosture";
 
 export type FilterKey =
-  | "all"
-  | "critical"
-  | "sanctions"
-  | "edd"
-  | "pep"
-  | "sla"
-  | "a24"
-  | "mine"
-  | "closed";
+  "all" | "critical" | "sanctions" | "edd" | "pep" | "sla" | "a24" | "mine" | "closed";
 
 export type TableColumnKey = "risk" | "status" | "cdd" | "sla" | "lists" | "snooze";
 

@@ -6,6 +6,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependencies** — bumped the minor/patch group (supersedes Dependabot #44):
+  `next` 16.2.10, `@anthropic-ai/sdk` 0.110, `eslint-config-next` 16.2.10,
+  `tailwindcss` / `@tailwindcss/postcss` 4.3.2, `postcss` 8.5.16,
+  `@types/node` 26.1.0, and `prettier` 3.9.4. Reformatted three files for
+  Prettier 3.9.4. Full CI green locally (format, typecheck, lint, coverage, build).
+
 ## [0.1.0] - 2026-07-05
 
 The first tagged release. Establishes the offline screening-console reference

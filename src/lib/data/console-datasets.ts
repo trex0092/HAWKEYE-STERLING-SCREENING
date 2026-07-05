@@ -4,14 +4,7 @@
 // open sanctions lists) so the app renders identically offline or in CI.
 
 export type ModuleKey =
-  | "screening"
-  | "cases"
-  | "sanctions"
-  | "media"
-  | "crypto"
-  | "vessels"
-  | "audit"
-  | "settings";
+  "screening" | "cases" | "sanctions" | "media" | "crypto" | "vessels" | "audit" | "settings";
 
 export interface SanctionSourceRow {
   name: string;
