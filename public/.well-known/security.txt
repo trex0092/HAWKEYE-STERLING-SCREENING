@@ -1,0 +1,11 @@
+# Security contact information for this project (RFC 9116).
+# Served at /.well-known/security.txt by the Next.js static asset pipeline.
+
+Contact: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/security/advisories/new
+Expires: 2027-07-05T00:00:00.000Z
+Policy: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/SECURITY.md
+Preferred-Languages: en
+Canonical: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/public/.well-known/security.txt
+
+# Please report vulnerabilities privately via GitHub Private Vulnerability
+# Reporting (the Contact link above). Do not open a public issue.

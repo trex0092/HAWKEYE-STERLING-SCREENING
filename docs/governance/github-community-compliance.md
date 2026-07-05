@@ -23,6 +23,11 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 | Governance model | ✅ 📄 | [`GOVERNANCE.md`](../../GOVERNANCE.md) |
 | Maintainers | ✅ 📄 | [`MAINTAINERS.md`](../../MAINTAINERS.md) |
 | Roadmap | ✅ 📄 | [`ROADMAP.md`](../../ROADMAP.md) |
+| Review guidelines | ✅ 📄 | [`REVIEWING.md`](../../REVIEWING.md) |
+| Authors / credits | ✅ 📄 | [`AUTHORS`](../../AUTHORS) |
+| Architecture overview | ✅ 📄 | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) |
+| Architecture Decision Records | ✅ 📄 | [`docs/adr/`](../adr/README.md) |
+| Security contact (RFC 9116) | ✅ | [`public/.well-known/security.txt`](../../public/.well-known/security.txt) |
 | Issue templates | ✅ | [`.github/ISSUE_TEMPLATE/`](../../.github/ISSUE_TEMPLATE) |
 | Pull request template | ✅ | [`.github/pull_request_template.md`](../../.github/pull_request_template.md) |
 | Code owners | ✅ | [`.github/CODEOWNERS`](../../.github/CODEOWNERS) |
