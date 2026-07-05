@@ -16,6 +16,12 @@ A compliance & sanctions **screening console** — a dense, keyboard-driven anal
 workspace for triaging subjects against sanctions lists, PEP databases, adverse
 media, and corporate/ownership intelligence.
 
+<p align="center">
+  <img src="./docs/assets/screenshot-console.png" alt="HAWKEYE Sterling screening console — dark analyst workspace with an AI-analyst HUD, risk stat tiles, and the subject register" width="100%" />
+  <br />
+  <em>The screening console — stat tiles, subject register, and the AI-analyst HUD (shown in its offline demo state).</em>
+</p>
+
 > [!IMPORTANT]
 > **Demo / reference build.** Out of the box this project runs **fully offline**:
 > every `/api/*` route returns deterministic **mock** data with no external calls
@@ -25,6 +31,24 @@ media, and corporate/ownership intelligence.
 > [Configuration](#configuration)) and otherwise degrade to the mocks. It is a
 > UI/architecture reference, **not** a production screening system; do not use it
 > to make real compliance decisions.
+
+---
+
+## Contents
+
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Getting started](#getting-started)
+- [Scripts](#scripts)
+- [Testing](#testing)
+- [Docker](#docker)
+- [Project structure](#project-structure)
+- [API routes (mock)](#api-routes-mock)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [Governance & security](#governance--security)
+- [Contributors](#contributors)
+- [License](#license)
 
 ---
 

@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **README hero screenshot & table of contents** — added a rendered screenshot
+  of the console (`docs/assets/screenshot-console.png`) at the top of the README
+  and a navigable Contents list, so the project reads professionally at a glance.
+
 ### Fixed
 
 - **CI lint step no longer crashes** — under ESLint 10, `eslint-plugin-react`'s
