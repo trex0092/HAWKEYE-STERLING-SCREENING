@@ -6,8 +6,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **CI lint step no longer crashes** — under ESLint 10, `eslint-plugin-react`'s
+  runtime React-version auto-detection threw `getFilename is not a function`,
+  failing the `Lint` job. Pinned the React version in `eslint.config.mjs` to skip
+  detection; `npm run lint` now passes cleanly.
+
 ### Added
 
+- **Test-coverage reporting & regression guardrails** — `npm run test:coverage`
+  measures coverage for `src/lib/**` via the v8 provider and enforces baseline
+  thresholds (statements 65% / branches 55% / functions 72% / lines 68%). CI runs
+  the covered test suite, publishes a coverage summary to the job page, and
+  uploads the HTML report as an artifact.
+- **Contributor recognition & decision records** — added an
+  [all-contributors](https://allcontributors.org) setup (`.all-contributorsrc` +
+  a Contributors table in the README) and two new ADRs: 0004 (HMAC-signed audit
+  trail) and 0005 (four-eyes & MLRO human-oversight controls).
 - **Process runbooks & enforced governance baseline** — added
   [`RELEASING.md`](RELEASING.md) (SemVer release runbook),
   [`TRIAGE.md`](TRIAGE.md) (issue/PR triage + label glossary), a third ADR

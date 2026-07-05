@@ -27,6 +27,7 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 | Release process | ✅ 📄 | [`RELEASING.md`](../../RELEASING.md) |
 | Issue / PR triage | ✅ 📄 | [`TRIAGE.md`](../../TRIAGE.md) |
 | Authors / credits | ✅ 📄 | [`AUTHORS`](../../AUTHORS) |
+| Contributor recognition (all-contributors) | ✅ | [`.all-contributorsrc`](../../.all-contributorsrc) + README |
 | Architecture overview | ✅ 📄 | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | Architecture Decision Records | ✅ 📄 | [`docs/adr/`](../adr/README.md) |
 | Security contact (RFC 9116) | ✅ | [`public/.well-known/security.txt`](../../public/.well-known/security.txt) |
@@ -62,6 +63,7 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 | Format check | ⚙️ | [`ci.yml`](../../.github/workflows/ci.yml) |
 | Unit tests | ⚙️ | [`ci.yml`](../../.github/workflows/ci.yml) |
 | Build | ⚙️ | [`ci.yml`](../../.github/workflows/ci.yml) |
+| Test coverage (thresholds + summary) | ⚙️ | [`ci.yml`](../../.github/workflows/ci.yml) + [`vitest.config.mts`](../../vitest.config.mts) |
 | End-to-end tests | ⚙️ | [`e2e.yml`](../../.github/workflows/e2e.yml) |
 | PR title convention | ⚙️ | [`pr-title-lint.yml`](../../.github/workflows/pr-title-lint.yml) |
 | Container publish (tags) | ⚙️ | [`docker-publish.yml`](../../.github/workflows/docker-publish.yml) |
