@@ -1,0 +1,94 @@
+# OpenSSF Security Insights (https://github.com/ossf/security-insights-spec)
+# Machine-readable summary of this project's security posture and processes.
+header:
+  schema-version: 1.0.0
+  expiration-date: "2027-07-05T00:00:00.000Z"
+  last-updated: "2026-07-05"
+  last-reviewed: "2026-07-05"
+  project-url: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING
+  changelog: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/CHANGELOG.md
+  license: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/LICENSE
+
+project-lifecycle:
+  status: active
+  roadmap: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/ROADMAP.md
+  bug-fixes-only: false
+  core-maintainers:
+    - https://github.com/trex0092
+
+contribution-policy:
+  accepts-pull-requests: true
+  accepts-automated-pull-requests: true
+  contributing-policy: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/CONTRIBUTING.md
+  code-of-conduct: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/CODE_OF_CONDUCT.md
+
+documentation:
+  - https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/README.md
+  - https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/docs/governance/README.md
+
+distribution-points:
+  - https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/pkgs/container/hawkeye-sterling-screening
+
+security-artifacts:
+  threat-model:
+    threat-model-created: false
+  self-assessment:
+    self-assessment-created: true
+    comment: |
+      A six-layer agentic-AI governance self-assessment and NIST/ISO/EU-AI-Act
+      framework mapping are maintained under docs/governance/.
+
+security-testing:
+  - tool-type: sca
+    tool-name: Dependabot
+    integration:
+      ad-hoc: false
+      ci: true
+      before-release: true
+    comment: Weekly dependency and GitHub Actions update PRs.
+  - tool-type: sast
+    tool-name: CodeQL
+    integration:
+      ad-hoc: false
+      ci: true
+      before-release: true
+    comment: security-and-quality query pack on push, PR, and weekly schedule.
+  - tool-type: sca
+    tool-name: Dependency Review
+    integration:
+      ad-hoc: false
+      ci: true
+      before-release: false
+    comment: Blocks PRs adding high-severity vulnerable or non-compliant deps.
+
+security-assessments:
+  - auditor-name: OpenSSF Scorecard
+    auditor-url: https://securityscorecards.dev
+    risk-assessment-url: https://securityscorecards.dev/viewer/?uri=github.com/trex0092/HAWKEYE-STERLING-SCREENING
+    comment: Automated supply-chain security posture, published on a schedule.
+
+security-contacts:
+  - type: url
+    value: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/security/advisories/new
+    primary: true
+
+vulnerability-reporting:
+  accepts-vulnerability-reports: true
+  security-policy: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/SECURITY.md
+  bug-bounty-available: false
+  comment: |
+    Report privately via GitHub Private Vulnerability Reporting. Do not open a
+    public issue. Acknowledgement within 5 business days.
+
+dependencies:
+  third-party-packages: true
+  dependencies-lists:
+    - https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/package.json
+    - https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/package-lock.json
+  sbom:
+    - sbom-file: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/dependency-graph/sbom
+      sbom-format: SPDX
+  dependencies-lifecycle:
+    policy-url: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/.github/dependabot.yml
+  env-dependencies-policy:
+    policy-url: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/blob/main/CONTRIBUTING.md
