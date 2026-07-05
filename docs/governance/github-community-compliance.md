@@ -24,6 +24,8 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 | Maintainers | ✅ 📄 | [`MAINTAINERS.md`](../../MAINTAINERS.md) |
 | Roadmap | ✅ 📄 | [`ROADMAP.md`](../../ROADMAP.md) |
 | Review guidelines | ✅ 📄 | [`REVIEWING.md`](../../REVIEWING.md) |
+| Release process | ✅ 📄 | [`RELEASING.md`](../../RELEASING.md) |
+| Issue / PR triage | ✅ 📄 | [`TRIAGE.md`](../../TRIAGE.md) |
 | Authors / credits | ✅ 📄 | [`AUTHORS`](../../AUTHORS) |
 | Architecture overview | ✅ 📄 | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | Architecture Decision Records | ✅ 📄 | [`docs/adr/`](../adr/README.md) |
@@ -75,6 +77,7 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 | Stale issue/PR triage | ⚙️ | [`.github/workflows/stale.yml`](../../.github/workflows/stale.yml) |
 | First-time contributor greeting | ⚙️ | [`.github/workflows/greetings.yml`](../../.github/workflows/greetings.yml) |
 | Documentation link check | ⚙️ | [`.github/workflows/links.yml`](../../.github/workflows/links.yml) |
+| Governance baseline enforced in CI | ⚙️ | [`.github/workflows/governance-check.yml`](../../.github/workflows/governance-check.yml) + [`scripts/check-governance.mjs`](../../scripts/check-governance.mjs) |
 
 ## Settings that require an admin action
 

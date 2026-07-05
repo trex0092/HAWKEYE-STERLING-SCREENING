@@ -29,3 +29,4 @@ Each record is a numbered Markdown file: `NNNN-short-title.md`. Use
 |---|---|---|
 | [0001](./0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
 | [0002](./0002-offline-mock-first-api.md) | Offline, mock-first API with env-gated live integrations | Accepted |
+| [0003](./0003-strict-typescript-and-design-tokens.md) | Strict TypeScript and design-system tokens | Accepted |
