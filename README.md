@@ -220,6 +220,8 @@ This project follows a documented, transparent governance and compliance model:
 | Roadmap | [`ROADMAP.md`](./ROADMAP.md) |
 | Contribution workflow | [`CONTRIBUTING.md`](./CONTRIBUTING.md) |
 | Pull-request review guidelines | [`REVIEWING.md`](./REVIEWING.md) |
+| Release process | [`RELEASING.md`](./RELEASING.md) |
+| Issue / PR triage | [`TRIAGE.md`](./TRIAGE.md) |
 | Architecture overview | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) |
 | Architecture Decision Records | [`docs/adr/`](./docs/adr/README.md) |
 | Community standards | [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) |

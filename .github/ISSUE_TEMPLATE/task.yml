@@ -1,0 +1,40 @@
+name: Task / chore
+description: Track a maintenance, tooling, or refactor task
+labels: ["refactor"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for internal work — refactors, tooling, CI, or housekeeping —
+        that isn't a user-facing bug or feature.
+  - type: textarea
+    id: task
+    attributes:
+      label: What needs doing?
+      description: Describe the task and the outcome that marks it complete.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why?
+      description: What problem does this solve or prevent?
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A short checklist of what "done" looks like.
+      placeholder: |
+        - [ ] ...
+        - [ ] CI stays green
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues and this isn't a duplicate.
+          required: true

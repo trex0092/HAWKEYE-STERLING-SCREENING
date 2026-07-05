@@ -8,6 +8,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Process runbooks & enforced governance baseline** — added
+  [`RELEASING.md`](RELEASING.md) (SemVer release runbook),
+  [`TRIAGE.md`](TRIAGE.md) (issue/PR triage + label glossary), a third ADR
+  (strict TypeScript & design tokens), and a `task` issue template. A new
+  hermetic CI check ([`governance-check.yml`](.github/workflows/governance-check.yml)
+  + [`scripts/check-governance.mjs`](scripts/check-governance.mjs)) fails the
+  build if any of the 47 required governance files is removed.
 - **Architecture & decision documentation** — added [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
   an Architecture Decision Record log ([`docs/adr/`](docs/adr/README.md)) with a
   template and the first two records, PR [`REVIEWING.md`](REVIEWING.md)
