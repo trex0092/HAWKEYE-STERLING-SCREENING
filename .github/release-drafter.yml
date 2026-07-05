@@ -1,0 +1,37 @@
+# Release Drafter configuration — assembles draft release notes from merged PRs.
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: "🚀 Features"
+    labels: [enhancement]
+  - title: "🐛 Bug Fixes"
+    labels: [bug]
+  - title: "📝 Documentation"
+    labels: [documentation, "area: docs"]
+  - title: "🧹 Maintenance & Refactor"
+    labels: [refactor, chore, test]
+  - title: "⬆️ Dependencies"
+    labels: [dependencies, github-actions, "area: dependencies"]
+  - title: "🔧 CI & Tooling"
+    labels: ["area: ci"]
+
+version-resolver:
+  major:
+    labels: [major, breaking]
+  minor:
+    labels: [minor, enhancement]
+  patch:
+    labels: [patch, bug, documentation, dependencies, chore]
+  default: patch
+
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+change-title-escapes: '\<*_&'
+exclude-labels:
+  - skip-changelog
+
+template: |
+  ## What's changed
+
+  $CHANGES
+
+  **Full changelog**: https://github.com/trex0092/HAWKEYE-STERLING-SCREENING/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

@@ -216,13 +216,18 @@ This project follows a documented, transparent governance and compliance model:
 | Area | Where |
 |---|---|
 | Project governance & decision-making | [`GOVERNANCE.md`](./GOVERNANCE.md) |
+| Maintainers | [`MAINTAINERS.md`](./MAINTAINERS.md) |
+| Roadmap | [`ROADMAP.md`](./ROADMAP.md) |
 | Contribution workflow | [`CONTRIBUTING.md`](./CONTRIBUTING.md) |
 | Community standards | [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) |
 | Getting support | [`SUPPORT.md`](./.github/SUPPORT.md) |
 | Security & vulnerability disclosure | [`SECURITY.md`](./SECURITY.md) |
+| Security Insights manifest (OpenSSF) | [`SECURITY-INSIGHTS.yml`](./SECURITY-INSIGHTS.yml) |
 | Code owners / required reviewers | [`.github/CODEOWNERS`](./.github/CODEOWNERS) |
+| Governance-as-code (repo & branch protection) | [`.github/settings.yml`](./.github/settings.yml) |
 | Dependency automation | [`.github/dependabot.yml`](./.github/dependabot.yml) |
 | Citation metadata | [`CITATION.cff`](./CITATION.cff) |
+| Compliance traceability matrix | [`docs/governance/github-community-compliance.md`](./docs/governance/github-community-compliance.md) |
 | AI-system & control governance | [`docs/governance/`](./docs/governance/README.md) |
 
 **Automated compliance checks** run in CI on every pull request and on a
@@ -236,6 +241,8 @@ schedule:
   ([`scorecard.yml`](./.github/workflows/scorecard.yml)).
 - **Type-check, lint, format, unit & E2E tests, build**
   ([`ci.yml`](./.github/workflows/ci.yml), [`e2e.yml`](./.github/workflows/e2e.yml)).
+- **PR-title Conventional Commits check, release-note drafting, stale triage,
+  auto-labeling, and Markdown link checking** round out the automation.
 
 Report vulnerabilities privately per the [Security Policy](./SECURITY.md) —
 never in a public issue.

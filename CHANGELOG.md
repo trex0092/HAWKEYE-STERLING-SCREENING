@@ -8,6 +8,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Governance depth: maintainers, roadmap & compliance traceability** — added
+  `MAINTAINERS.md`, `ROADMAP.md`, an OpenSSF `SECURITY-INSIGHTS.yml` manifest,
+  and a `docs/governance/github-community-compliance.md` matrix mapping every
+  community/supply-chain control to where it lives. Added governance-as-code via
+  `.github/settings.yml` (repo + branch-protection intent), plus automation:
+  Release Drafter, Conventional-Commits PR-title linting, first-contributor
+  greetings, non-blocking Markdown link checking, and a documentation issue
+  template.
 - **GitHub governance & compliance hardening** — completed the community-health
   and supply-chain security baseline: a project `GOVERNANCE.md`, `SUPPORT.md`,
   `CITATION.cff`, and a `FUNDING.yml` placeholder; version-controlled issue

@@ -1,0 +1,40 @@
+name: Documentation issue
+description: Report a problem or suggest an improvement to the docs
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the documentation! Use this for README,
+        governance, or `docs/` content — not for code bugs.
+  - type: input
+    id: location
+    attributes:
+      label: Which document / page?
+      description: File path or URL of the affected documentation.
+      placeholder: README.md → Configuration, or docs/governance/README.md
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong or missing?
+      description: Describe the inaccuracy, gap, or confusing section.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: How should it read instead? A proposed wording is welcome.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues and this isn't a duplicate.
+          required: true
+        - label: This is a documentation issue, not a code bug or security report.
+          required: true
