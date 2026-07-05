@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Architecture & decision documentation** — added [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
+  an Architecture Decision Record log ([`docs/adr/`](docs/adr/README.md)) with a
+  template and the first two records, PR [`REVIEWING.md`](REVIEWING.md)
+  guidelines, an [`AUTHORS`](AUTHORS) credits file, and an RFC 9116
+  [`security.txt`](public/.well-known/security.txt) security-contact record. The
+  compliance matrix and README governance index reference all of them.
 - **Governance depth: maintainers, roadmap & compliance traceability** — added
   `MAINTAINERS.md`, `ROADMAP.md`, an OpenSSF `SECURITY-INSIGHTS.yml` manifest,
   and a `docs/governance/github-community-compliance.md` matrix mapping every
