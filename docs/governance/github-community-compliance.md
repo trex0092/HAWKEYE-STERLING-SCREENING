@@ -44,7 +44,7 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 |---|---|---|
 | Dependency updates (SCA) | ⚙️ | [`.github/dependabot.yml`](../../.github/dependabot.yml) |
 | Static analysis (SAST) | ⚙️ | [`.github/workflows/codeql.yml`](../../.github/workflows/codeql.yml) |
-| Dependency review on PRs | ⚙️ | [`.github/workflows/dependency-review.yml`](../../.github/workflows/dependency-review.yml) |
+| Dependency review on PRs | ⚙️ 🔒 | [`.github/workflows/dependency-review.yml`](../../.github/workflows/dependency-review.yml) — advisory until Dependency graph is enabled |
 | Supply-chain posture | ⚙️ | [`.github/workflows/scorecard.yml`](../../.github/workflows/scorecard.yml) |
 | Security Insights manifest | 📄 | [`SECURITY-INSIGHTS.yml`](../../SECURITY-INSIGHTS.yml) |
 | Least-privilege workflow tokens | ✅ | `permissions:` block in every workflow |
@@ -91,6 +91,10 @@ effect once enabled in the repository/organisation settings by an admin:
    manually to match it.
 2. **Private vulnerability reporting** — Settings → Security → enable.
 3. **Secret scanning + push protection** — Settings → Code security → enable.
-4. **Dependency graph / SBOM export** — Settings → Code security → enable.
+4. **Dependency graph / SBOM export** — Settings → Code security → enable. This
+   also makes the **Dependency Review** workflow functional; once enabled,
+   remove `continue-on-error` from
+   [`dependency-review.yml`](../../.github/workflows/dependency-review.yml) to
+   promote it back to a blocking gate.
 
 _Last reviewed: 2026-07-05._
