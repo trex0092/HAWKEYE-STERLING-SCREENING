@@ -1,0 +1,69 @@
+name: CI security audit
+
+# Audits the CI/CD configuration itself — the workflows are part of the attack
+# surface. actionlint catches workflow bugs; zizmor audits them for security
+# issues (injection, excessive permissions, dangerous triggers) and reports to
+# code scanning. Report-only for now; promote to gating once findings are clean.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/**"
+  schedule:
+    - cron: "12 5 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actionlint:
+    name: Lint workflows (actionlint)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run actionlint
+        # Official image; report-only for now (never fails the build).
+        run: docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint:latest -color || true
+
+  zizmor:
+    name: Audit workflows (zizmor)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run zizmor
+        # Report-only: never fail the build, just surface findings as SARIF.
+        run: pipx run zizmor --offline --format sarif .github/workflows/ > zizmor.sarif || true
+
+      - name: Upload zizmor results to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor

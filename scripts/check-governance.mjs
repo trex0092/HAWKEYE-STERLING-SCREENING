@@ -49,6 +49,7 @@ const required = [
   ".github/workflows/codeql.yml",
   ".github/workflows/dependency-review.yml",
   ".github/workflows/scorecard.yml",
+  ".github/workflows/ci-security.yml",
   ".github/workflows/stale.yml",
   ".github/workflows/labeler.yml",
   ".github/workflows/labels.yml",

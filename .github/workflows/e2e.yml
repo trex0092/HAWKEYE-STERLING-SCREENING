@@ -13,6 +13,11 @@ jobs:
     name: Playwright (Chromium)
     runs-on: ubuntu-latest
     steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@v7
 
