@@ -20,10 +20,10 @@ export default defineConfig({
       // Tight regression wall: set just under current coverage so any drop
       // fails CI. Ratchet upward as coverage improves — never downward.
       thresholds: {
-        statements: 70,
-        branches: 60,
-        functions: 79,
-        lines: 72,
+        statements: 74,
+        branches: 63,
+        functions: 81,
+        lines: 77,
       },
     },
   },

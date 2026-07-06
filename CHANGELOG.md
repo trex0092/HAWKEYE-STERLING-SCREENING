@@ -6,6 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Client audit log survives a corrupt store** — `writeAuditEvent` previously
+  aborted (dropping the new entry) if the persisted log was unparseable. It now
+  parses defensively and starts a fresh log, so a single corrupt value can no
+  longer block new audit entries.
+
+### Added
+
+- **Tests for the client fetch wrapper and audit log** — new suites for
+  `fetchJson` (success, non-2xx, bad JSON, network error, header/body
+  forwarding, timeout/abort) and the client audit log (append, ordering, the
+  1000-entry cap, corruption recovery, update event). Overall coverage rose to
+  ~75% statements / 64% branches, and the enforced thresholds were ratcheted up
+  to match (statements 74 / branches 63 / functions 81 / lines 77).
+
 ### Security
 
 - **Workflow security audit is now a clean, blocking gate** — zizmor runs clean
