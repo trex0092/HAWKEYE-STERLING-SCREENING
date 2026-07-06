@@ -2,8 +2,12 @@ name: PR title check
 
 # Enforces Conventional Commits style on pull-request titles so release notes
 # and history stay consistent. See CONTRIBUTING.md.
+#
+# Uses `pull_request` (not `pull_request_target`): the check only reads the PR
+# title and fails the job — it needs no write token — so the safer trigger is
+# correct here and works on PRs from forks.
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, edited, reopened, synchronize]
 
 permissions:

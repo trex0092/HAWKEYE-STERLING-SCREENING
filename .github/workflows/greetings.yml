@@ -1,7 +1,11 @@
 name: Greetings
 
 # Welcomes first-time contributors with pointers to the guides they need.
-on:
+#
+# first-interaction needs a write token to comment on PRs opened from forks and
+# does not check out or execute any PR-provided code, so this pull_request_target
+# use is safe (justified suppression below).
+on: # zizmor: ignore[dangerous-triggers]
   issues:
     types: [opened]
   pull_request_target:

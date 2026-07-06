@@ -53,7 +53,8 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 | Security Insights manifest | 📄 | [`SECURITY-INSIGHTS.yml`](../../SECURITY-INSIGHTS.yml) |
 | Least-privilege workflow tokens | ✅ | `permissions:` block in every workflow |
 | CI runner egress hardening | ⚙️ | `step-security/harden-runner` (audit) in CI & E2E |
-| Workflow security audit (actionlint + zizmor) | ⚙️ | [`.github/workflows/ci-security.yml`](../../.github/workflows/ci-security.yml) |
+| Checkout credential hardening | ✅ | `persist-credentials: false` on every checkout |
+| Workflow security audit (zizmor, **gating**; actionlint advisory) | ⚙️ | [`.github/workflows/ci-security.yml`](../../.github/workflows/ci-security.yml) |
 | Image vuln gate (fixable CRITICAL blocks release) | ⚙️ | [`docker-publish.yml`](../../.github/workflows/docker-publish.yml) (Trivy) |
 | Concurrency / cancel-in-progress | ✅ | CI, CodeQL, Scorecard, stale workflows |
 | Pinned action versions | ✅ | All `.github/workflows/*` |
