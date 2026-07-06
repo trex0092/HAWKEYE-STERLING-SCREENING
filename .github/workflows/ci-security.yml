@@ -2,8 +2,9 @@ name: CI security audit
 
 # Audits the CI/CD configuration itself — the workflows are part of the attack
 # surface. actionlint catches workflow bugs; zizmor audits them for security
-# issues (injection, excessive permissions, dangerous triggers) and reports to
-# code scanning. Report-only for now; promote to gating once findings are clean.
+# issues (injection, excessive permissions, dangerous triggers) and reports the
+# findings in the job summary. Report-only for now; promote to gating once the
+# accepted patterns (e.g. pull_request_target for fork labeling) are pinned/clean.
 on:
   push:
     branches: [main]
@@ -46,7 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@v2
@@ -55,15 +55,17 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Run zizmor
-        # Report-only: never fail the build, just surface findings as SARIF.
-        run: pipx run zizmor --offline --format sarif .github/workflows/ > zizmor.sarif || true
-
-      - name: Upload zizmor results to code scanning
-        uses: github/codeql-action/upload-sarif@v3
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        with:
-          sarif_file: zizmor.sarif
-          category: zizmor
+        # Report-only: surface findings in the job summary; never fail the build
+        # and never open code-scanning alerts for the accepted workflow patterns.
+        run: |
+          {
+            echo '## zizmor workflow audit'
+            echo ''
+            echo '```'
+            pipx run zizmor --offline --format plain .github/workflows/ 2>&1 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
