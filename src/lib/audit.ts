@@ -22,9 +22,15 @@ export function writeAuditEvent(actor: string, action: string, target: string): 
   };
   if (typeof window === "undefined") return;
   try {
-    const raw = window.localStorage.getItem(AUDIT_KEY);
-    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-    const list: AuditEntry[] = Array.isArray(parsed) ? (parsed as AuditEntry[]) : [];
+    let list: AuditEntry[] = [];
+    try {
+      const raw = window.localStorage.getItem(AUDIT_KEY);
+      const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+      if (Array.isArray(parsed)) list = parsed as AuditEntry[];
+    } catch {
+      // Corrupt store: start a fresh log rather than dropping this audit entry.
+      list = [];
+    }
     list.push(entry);
     const trimmed = list.slice(-MAX_ENTRIES);
     window.localStorage.setItem(AUDIT_KEY, JSON.stringify(trimmed));
