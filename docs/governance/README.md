@@ -17,7 +17,7 @@ surrounding **Asana automation** — aligns with the **6 Layers of Agentic AI Go
 |---|---|---|
 | 1 · Discovery & Inventory | 🟢 | AI system register + framework mapping written; components inventoried. |
 | 2 · Data Governance | 🟢 | Source lineage + "honest verdicts" + a data retention & deletion policy. |
-| 3 · Security & Resilience | 🟢 | HMAC-signed audit, four-eyes, RBAC, rate limiting, incident playbook. |
+| 3 · Security & Resilience | 🟢 | HMAC-signed audit, four-eyes, RBAC, rate limiting, incident playbook, STRIDE threat model, image SBOM + provenance + scan. |
 | 4 · Model & Agent Assurance | 🟢 | Output coercion + golden eval + red-team tests + LLM drift logging. |
 | 5 · Human Oversight | 🟢 | Escalate/override, four-eyes, **MLRO sign-off gate**, SLA escalation. |
 | 6 · Governance, Compliance & Audit | 🟢 | Tamper-evident audit + export, AI risk register, NIST/ISO/EU-AI-Act mapping. |

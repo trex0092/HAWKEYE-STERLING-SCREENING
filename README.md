@@ -260,7 +260,9 @@ This project follows a documented, transparent governance and compliance model:
 | Community standards | [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) |
 | Getting support | [`SUPPORT.md`](./.github/SUPPORT.md) |
 | Security & vulnerability disclosure | [`SECURITY.md`](./SECURITY.md) |
+| Threat model (STRIDE) | [`docs/governance/threat-model.md`](./docs/governance/threat-model.md) |
 | Security Insights manifest (OpenSSF) | [`SECURITY-INSIGHTS.yml`](./SECURITY-INSIGHTS.yml) |
+| Deployment runbook | [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) |
 | Code owners / required reviewers | [`.github/CODEOWNERS`](./.github/CODEOWNERS) |
 | Governance-as-code (repo & branch protection) | [`.github/settings.yml`](./.github/settings.yml) |
 | Dependency automation | [`.github/dependabot.yml`](./.github/dependabot.yml) |
@@ -277,6 +279,9 @@ schedule:
   ([`dependency-review.yml`](./.github/workflows/dependency-review.yml)).
 - **OpenSSF Scorecard** — supply-chain security posture
   ([`scorecard.yml`](./.github/workflows/scorecard.yml)).
+- **Signed container supply chain** — each published image ships an SPDX SBOM, a
+  signed SLSA build-provenance attestation, and a Trivy vulnerability scan
+  ([`docker-publish.yml`](./.github/workflows/docker-publish.yml)).
 - **Type-check, lint, format, unit & E2E tests, build**
   ([`ci.yml`](./.github/workflows/ci.yml), [`e2e.yml`](./.github/workflows/e2e.yml)).
 - **PR-title Conventional Commits check, release-note drafting, stale triage,

@@ -59,9 +59,11 @@ const required = [
   ".github/workflows/governance-check.yml",
   // Docs
   "docs/ARCHITECTURE.md",
+  "docs/DEPLOYMENT.md",
   "docs/adr/README.md",
   "docs/governance/README.md",
   "docs/governance/github-community-compliance.md",
+  "docs/governance/threat-model.md",
   // Security contact
   "public/.well-known/security.txt",
 ];
