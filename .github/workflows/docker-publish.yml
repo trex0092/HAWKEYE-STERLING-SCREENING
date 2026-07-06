@@ -95,3 +95,12 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
           category: trivy-image
+
+      - name: Gate — fail on fixable CRITICAL vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
+          severity: CRITICAL
+          ignore-unfixed: true # only block on issues we can actually fix
+          format: table
+          exit-code: "1"

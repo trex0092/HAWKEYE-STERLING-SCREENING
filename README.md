@@ -280,8 +280,12 @@ schedule:
 - **OpenSSF Scorecard** — supply-chain security posture
   ([`scorecard.yml`](./.github/workflows/scorecard.yml)).
 - **Signed container supply chain** — each published image ships an SPDX SBOM, a
-  signed SLSA build-provenance attestation, and a Trivy vulnerability scan
+  signed SLSA build-provenance attestation, and a Trivy vulnerability scan that
+  **blocks the release on a fixable CRITICAL**
   ([`docker-publish.yml`](./.github/workflows/docker-publish.yml)).
+- **CI hardening** — runner egress auditing (`harden-runner`) and a workflow
+  security audit (`actionlint` + `zizmor`) that treats the pipeline itself as
+  attack surface ([`ci-security.yml`](./.github/workflows/ci-security.yml)).
 - **Type-check, lint, format, unit & E2E tests, build**
   ([`ci.yml`](./.github/workflows/ci.yml), [`e2e.yml`](./.github/workflows/e2e.yml)).
 - **PR-title Conventional Commits check, release-note drafting, stale triage,

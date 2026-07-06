@@ -17,13 +17,13 @@ export default defineConfig({
       reportsDirectory: "coverage",
       include: ["src/lib/**/*.{ts,tsx}"],
       exclude: ["src/lib/data/generated/**", "**/*.d.ts", "**/types.ts"],
-      // Baseline guardrails set just below current coverage to prevent
-      // regressions. Raise these as coverage improves.
+      // Tight regression wall: set just under current coverage so any drop
+      // fails CI. Ratchet upward as coverage improves — never downward.
       thresholds: {
-        statements: 65,
-        branches: 55,
-        functions: 72,
-        lines: 68,
+        statements: 70,
+        branches: 60,
+        functions: 79,
+        lines: 72,
       },
     },
   },

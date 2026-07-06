@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Hardened enforcement ("weaponized" CI)** — turned the defensive posture from
+  advisory to enforcing: coverage thresholds ratcheted to just under current
+  (statements 70 / branches 60 / functions 79 / lines 72) so any regression
+  fails CI; the container release now **blocks on a fixable CRITICAL** image
+  vulnerability (Trivy gate); Dependency Review tightened to `moderate`; CI and
+  E2E runners gain `harden-runner` egress auditing; and a new
+  [`ci-security.yml`](.github/workflows/ci-security.yml) audits the workflows
+  themselves with `actionlint` + `zizmor` (SARIF to code scanning). The
+  governance-files check now tracks 50 files.
+
 ### Added
 
 - **Security depth: threat model & signed container supply chain** — added a
