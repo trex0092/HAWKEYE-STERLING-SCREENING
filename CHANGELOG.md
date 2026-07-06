@@ -6,6 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Security
+
+- **All GitHub Actions pinned to full commit SHAs** — every `uses:` across the
+  workflows is now pinned to an immutable commit (with a `# vX` comment for
+  readability), closing the mutable-tag supply-chain risk and satisfying OpenSSF
+  Scorecard's Pinned-Dependencies and zizmor's `unpinned-uses`. Dependabot keeps
+  the pins current. This also fixed a latent bug (`trivy-action@0.28.0` did not
+  exist — the tag is `v0.28.0`) and replaced the non-resolving
+  `scorecard-action@v2` with the concrete `v2.4.3`.
+
 ### Changed
 
 - **Hardened enforcement ("weaponized" CI)** — turned the defensive posture from
