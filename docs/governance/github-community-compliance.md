@@ -100,8 +100,8 @@ effect once enabled in the repository/organisation settings by an admin:
 3. **Secret scanning + push protection** — Settings → Code security → enable.
 4. **Dependency graph / SBOM export** — Settings → Code security → enable. This
    also makes the **Dependency Review** workflow functional; once enabled,
-   remove `continue-on-error` from
+   remove the review step's `continue-on-error` in
    [`dependency-review.yml`](../../.github/workflows/dependency-review.yml) to
-   promote it back to a blocking gate.
+   promote it to a blocking gate.
 
 _Last reviewed: 2026-07-05._
