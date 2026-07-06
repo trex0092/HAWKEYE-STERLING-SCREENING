@@ -8,6 +8,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Security
 
+- **Workflow security audit is now a clean, blocking gate** — zizmor runs clean
+  across all workflows and fails CI on any finding. Added `persist-credentials:
+  false` to every checkout (fixes zizmor's `artipacked`), downgraded the PR-title
+  check from `pull_request_target` to the safer `pull_request` (it only reads the
+  title), and annotated the one legitimate `pull_request_target` (contributor
+  greetings — needs write to comment on fork PRs, no untrusted checkout) with a
+  justified `# zizmor: ignore[dangerous-triggers]`.
 - **All GitHub Actions pinned to full commit SHAs** — every `uses:` across the
   workflows is now pinned to an immutable commit (with a `# vX` comment for
   readability), closing the mutable-tag supply-chain risk and satisfying OpenSSF
