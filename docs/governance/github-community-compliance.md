@@ -46,6 +46,10 @@ Legend: ✅ implemented · ⚙️ automated in CI · 📄 documented · 🔒 set
 | Static analysis (SAST) | ⚙️ | [`.github/workflows/codeql.yml`](../../.github/workflows/codeql.yml) |
 | Dependency review on PRs | ⚙️ 🔒 | [`.github/workflows/dependency-review.yml`](../../.github/workflows/dependency-review.yml) — advisory until Dependency graph is enabled |
 | Supply-chain posture | ⚙️ | [`.github/workflows/scorecard.yml`](../../.github/workflows/scorecard.yml) |
+| Threat model (STRIDE) | 📄 | [`docs/governance/threat-model.md`](./threat-model.md) |
+| Container SBOM + SLSA provenance | ⚙️ | [`.github/workflows/docker-publish.yml`](../../.github/workflows/docker-publish.yml) |
+| Container image vulnerability scan | ⚙️ | [`.github/workflows/docker-publish.yml`](../../.github/workflows/docker-publish.yml) (Trivy) |
+| Deployment runbook | 📄 | [`docs/DEPLOYMENT.md`](../DEPLOYMENT.md) |
 | Security Insights manifest | 📄 | [`SECURITY-INSIGHTS.yml`](../../SECURITY-INSIGHTS.yml) |
 | Least-privilege workflow tokens | ✅ | `permissions:` block in every workflow |
 | Concurrency / cancel-in-progress | ✅ | CI, CodeQL, Scorecard, stale workflows |

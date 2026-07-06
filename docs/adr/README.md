@@ -32,3 +32,4 @@ Each record is a numbered Markdown file: `NNNN-short-title.md`. Use
 | [0003](./0003-strict-typescript-and-design-tokens.md) | Strict TypeScript and design-system tokens | Accepted |
 | [0004](./0004-hmac-signed-audit-trail.md) | HMAC-signed, tamper-evident audit trail | Accepted |
 | [0005](./0005-human-oversight-controls.md) | Human oversight: four-eyes and MLRO sign-off | Accepted |
+| [0006](./0006-container-image-supply-chain.md) | Container image supply-chain hardening | Accepted |

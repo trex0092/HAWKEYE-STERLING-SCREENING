@@ -31,7 +31,9 @@ distribution-points:
 
 security-artifacts:
   threat-model:
-    threat-model-created: false
+    threat-model-created: true
+    comment: |
+      A STRIDE threat model is maintained at docs/governance/threat-model.md.
   self-assessment:
     self-assessment-created: true
     comment: |
@@ -60,6 +62,13 @@ security-testing:
       ci: true
       before-release: false
     comment: Blocks PRs adding high-severity vulnerable or non-compliant deps.
+  - tool-type: container-scanning
+    tool-name: Trivy
+    integration:
+      ad-hoc: false
+      ci: false
+      before-release: true
+    comment: Scans the published container image; results go to code scanning.
 
 security-assessments:
   - auditor-name: OpenSSF Scorecard

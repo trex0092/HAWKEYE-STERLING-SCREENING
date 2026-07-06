@@ -1,7 +1,11 @@
 name: Publish Docker image
 
-# Builds and publishes the container image to GitHub Container Registry (GHCR).
-# Runs on version tags (e.g. v1.2.3) and on-demand, so it never gates regular PRs.
+# Builds, signs, and publishes the container image to GitHub Container Registry
+# (GHCR). Runs on version tags (e.g. v1.2.3) and on-demand, so it never gates
+# regular PRs. Beyond building, it hardens the artifact supply chain:
+#   * a signed SLSA build-provenance attestation,
+#   * an SPDX SBOM, and
+#   * a Trivy vulnerability scan published to code scanning.
 on:
   push:
     tags: ["v*"]
@@ -9,15 +13,24 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   publish:
     name: Build & push image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # push image to GHCR
+      id-token: write # provenance attestation (SLSA)
+      attestations: write # provenance attestation
+      security-events: write # upload Trivy SARIF to code scanning
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Set lowercase image name
+        # GHCR requires a lowercase repository path.
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -33,13 +46,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ env.IMAGE }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
 
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -48,3 +62,36 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Attest build provenance (SLSA)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+          upload-artifact: true
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          # Report findings to code scanning; do not fail the release build.
+          exit-code: "0"
+
+      - name: Upload scan results to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: ${{ !cancelled() }}
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-image

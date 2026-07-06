@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Security depth: threat model & signed container supply chain** — added a
+  STRIDE [`threat-model.md`](docs/governance/threat-model.md) (flipping the
+  OpenSSF Security Insights `threat-model-created` to true) and a
+  [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) runbook. Hardened the container
+  release ([`docker-publish.yml`](.github/workflows/docker-publish.yml)) with an
+  SPDX **SBOM**, a signed **SLSA build-provenance attestation**, and a **Trivy**
+  image vulnerability scan published to code scanning — documented in
+  [ADR-0006](docs/adr/0006-container-image-supply-chain.md). The governance
+  matrix, six-layer status, README, and governance-files check now cover them.
+
 ### Changed
 
 - **Dependencies** — bumped the minor/patch group (supersedes Dependabot #44):
