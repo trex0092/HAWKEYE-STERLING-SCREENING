@@ -60,6 +60,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install zizmor
+        run: pipx install zizmor==1.26.1
+
       - name: Run zizmor (gating)
         # Fails the job on any finding. Pinned version for reproducibility.
-        run: pipx run zizmor@1.26.1 --offline .github/workflows/
+        run: zizmor --offline .github/workflows/
