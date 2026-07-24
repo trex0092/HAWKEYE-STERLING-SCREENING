@@ -31,10 +31,10 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.112.1",
-    "next": "16.2.10",
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "@anthropic-ai/sdk": "^0.114.0",
+    "next": "16.2.11",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
@@ -45,13 +45,13 @@
     "@types/node": "26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.3",
+    "@vitejs/plugin-react": "6.0.4",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "10.7.0",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.2.11",
     "jsdom": "29.1.1",
-    "postcss": "8.5.19",
-    "prettier": "3.9.5",
+    "postcss": "8.5.22",
+    "prettier": "3.9.6",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite-tsconfig-paths": "6.1.1",
